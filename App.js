@@ -38,49 +38,21 @@ export default class App extends React.Component {
 						imageStyle={this.styles.modalImage}
 						style={this.styles.modalContent}>
 						
-						<View style={this.styles.modalSettingsNewPlus}>
-							<TouchableOpacity 
-								onPress={()=>this.setState({settingsPage: "settingsNew"})}
-								activeOpacity={0.2} >
-								<Image 
-									style={this.styles.modalSettingsNew} 
-									source={this.getSettingsNewImage()} />
-							</TouchableOpacity>
-							
-							<TouchableOpacity 
-								onPress={()=>this.setState({settingsPage: "settingsPlus"})}
-								activeOpacity={0.2} >
-								<Image 
-									style={this.styles.modalSettingsPlus} 
-									source={this.getSettingsPlusImage()} />
-							</TouchableOpacity>							
-						</View>
-						
 						<ScrollView style={this.styles.modalScroll}>
-						
+							
 							<View style={this.styles.modalSettingContainer}>
-								<Text style={this.styles.modalSettingLabel}>Class</Text>
+								<Text style={this.styles.modalSettingLabel}>Level</Text>
 								<Picker
-									selectedValue={this.state[this.state.settingsPage].Class}
-									style={this.styles.modalSettingPicker}
-									onValueChange={(itemValue, itemIndex) => this.setSetting("Class", itemValue, this.state.settingsPage)}
-									mode="dropdown" 
-									enabled={this.state[this.state.settingsPage].Level > 0}>
+									selectedValue={this.state[this.state.settingsPage].Level}
+									style={this.styles.modalSettingPickerThin}
+									onValueChange={(itemValue, itemIndex) => this.setSetting("Level", itemValue, this.state.settingsPage)}
+									mode="dropdown" >
 									
-									<Picker.Item label="Any" value="Any" />
-									<Picker.Item label="Artificer" value="Artificer" />
-									<Picker.Item label="Barbarian" value="Barbarian" />
-									<Picker.Item label="Bard" value="Bard" />
-									<Picker.Item label="Cleric" value="Cleric" />
-									<Picker.Item label="Druid" value="Druid" />
-									<Picker.Item label="Fighter" value="Fighter" />
-									<Picker.Item label="Monk" value="Monk" />
-									<Picker.Item label="Paladin" value="Paladin" />
-									<Picker.Item label="Ranger" value="Ranger" />
-									<Picker.Item label="Rogue" value="Rogue" />
-									<Picker.Item label="Sorcerer" value="Sorcerer" />
-									<Picker.Item label="Warlock" value="Warlock" />
-									<Picker.Item label="Wizard" value="Wizard" />
+									<Picker.Item label="0" value={0} />
+									<Picker.Item label="1" value={1} />
+									<Picker.Item label="2" value={2} />
+									<Picker.Item label="3" value={3} />
+									<Picker.Item label="4" value={4} />
 								</Picker>
 							</View>
 							
@@ -106,21 +78,41 @@ export default class App extends React.Component {
 									<Picker.Item label="Tiefling" value="Tiefling" />
 								</Picker>
 							</View>
-							
-							<View style={this.styles.modalSettingContainer}>
-								<Text style={this.styles.modalSettingLabel}>Level</Text>
+						
+							<View style={[this.styles.modalSettingContainer, this.state[this.state.settingsPage].Level > 0 ? this.styles.visible : this.styles.hidden]}>
+								<Text style={this.styles.modalSettingLabel}>Class</Text>
 								<Picker
-									selectedValue={this.state[this.state.settingsPage].Level}
-									style={this.styles.modalSettingPickerThin}
-									onValueChange={(itemValue, itemIndex) => this.setSetting("Level", itemValue, this.state.settingsPage)}
+									selectedValue={this.state[this.state.settingsPage].Class}
+									style={this.styles.modalSettingPicker}
+									onValueChange={(itemValue, itemIndex) => this.setSetting("Class", itemValue, this.state.settingsPage)}
 									mode="dropdown" >
 									
-									<Picker.Item label="0" value={0} />
-									<Picker.Item label="1" value={1} />
-									<Picker.Item label="2" value={2} />
-									<Picker.Item label="3" value={3} />
-									<Picker.Item label="4" value={4} />
+									<Picker.Item label="Any" value="Any" />
+									<Picker.Item label="Artificer" value="Artificer" />
+									<Picker.Item label="Barbarian" value="Barbarian" />
+									<Picker.Item label="Bard" value="Bard" />
+									<Picker.Item label="Cleric" value="Cleric" />
+									<Picker.Item label="Druid" value="Druid" />
+									<Picker.Item label="Fighter" value="Fighter" />
+									<Picker.Item label="Monk" value="Monk" />
+									<Picker.Item label="Paladin" value="Paladin" />
+									<Picker.Item label="Ranger" value="Ranger" />
+									<Picker.Item label="Rogue" value="Rogue" />
+									<Picker.Item label="Sorcerer" value="Sorcerer" />
+									<Picker.Item label="Warlock" value="Warlock" />
+									<Picker.Item label="Wizard" value="Wizard" />
 								</Picker>
+							</View>
+						
+							<View style={[this.styles.modalSettingContainer, this.state[this.state.settingsPage].Level > 0 ? this.styles.hidden : this.styles.visible]}>
+								<Text style={this.styles.modalSettingLabel}>Level 0 NPCs have no class!</Text>
+							</View>
+
+							<View style={this.styles.modalHeaderContainer}>
+								<Text style={this.styles.modalHeaderLabel}>Use Custom Traits</Text>
+								<TouchableOpacity onPress={() => this.setSetting("useCustomTraits", !this.state[this.state.settingsPage].useCustomTraits, this.state.settingsPage)} activeOpacity={0.5}>
+									<Image style={this.styles.modalHeaderInput} source={this.getCheckbox(this.state[this.state.settingsPage].useCustomTraits)}></Image>
+								</TouchableOpacity>
 							</View>
 							
 							<View style={this.styles.modalSettingContainer}>
@@ -180,6 +172,28 @@ export default class App extends React.Component {
 					</ImageBackground>
 					
 				</Modal>
+
+				<Modal
+					animationType="fade"
+					transparent={true}
+					visible={this.state.customizeVisible}
+					onRequestClose={()=>{}}>
+					
+					<TouchableOpacity 
+						style={this.styles.modalBackground} 
+						onPress={()=>this.showCustomize(false)}
+						activeOpacity={0.5} />
+					
+					<ImageBackground
+						source={require('./src/plaque.jpg')}
+						imageStyle={this.styles.modalImage}
+						style={this.styles.modalContent}>
+						
+						<ScrollView style={this.styles.modalScroll}>
+						</ScrollView>
+					</ImageBackground>
+					
+				</Modal>
 				
 				<View style={this.styles.topBar}>
 				
@@ -195,13 +209,13 @@ export default class App extends React.Component {
 					<View style={this.styles.bigButtonContainer}>
 						<TouchableOpacity onPress={() => this.newCharacter("settingsNew")}>
 							<Image
-								source={require('./src/signNew.png')}
+								source={require('./src/signNewSolo.png')}
 								style={this.styles.bigButtonLeft}
 							/>
 						</TouchableOpacity>
-						<TouchableOpacity onPress={() => this.newCharacter("settingsPlus")}>
+						<TouchableOpacity onPress={()=>this.showSettings(true)}>
 							<Image
-								source={require('./src/sign+.png')}
+								source={require('./src/signSmall.png')}
 								style={this.styles.bigButtonRight}
 							/>
 						</TouchableOpacity>
@@ -209,7 +223,7 @@ export default class App extends React.Component {
 				
 				
 					<View style={this.styles.cornerContainer}>
-						<TouchableOpacity onPress={()=>this.showSettings(true)}>
+						<TouchableOpacity onPress={()=>this.showCustomize(true)}>
 							<Image
 								source={require('./src/shieldGear.png')}
 								style={this.styles.smallButton}
@@ -363,6 +377,16 @@ export default class App extends React.Component {
 			characters: [],
 			showText: false,
 			settingsVisible: false,
+			customizeVisible: false,
+			customTraits: {
+				personalities: [], // name
+				accents: [], // name
+				appearences: [], // name
+				equipment: [], // name, description (optional), class req (optional, checklist, pulls from customs too)
+				abilities: [], // name, description (optional), class req (optional, checklist, pulls from customs too)
+				races: [], // name, stat buff major (dropdown), stat buff minor (dropdown), ability (string)
+				classes: [], // name, stat req major (dropdown), stat req minor (dropdown), ability (string), weapon (dropdown), armor (dropdown)
+			},
 			settingsPage: "settingsNew",
 			settingsNew: {
 				Class: "Any",
@@ -370,7 +394,8 @@ export default class App extends React.Component {
 				Equipment: 3,
 				Level: 0,
 				Personality: 2,
-				Appearance: 2
+				Appearance: 2,
+				useCustomTraits: true
 			},
 			settingsPlus: {
 				Class: "Any",
@@ -378,7 +403,8 @@ export default class App extends React.Component {
 				Equipment: 4,
 				Level: 1,
 				Personality: 2,
-				Appearance: 2
+				Appearance: 2,
+				useCustomTraits: true
 			},
 			keyboardShowing: false,
 			keyboardHeight: 0
@@ -389,9 +415,13 @@ export default class App extends React.Component {
 		this.deleteCharacter = this.deleteCharacter.bind(this);
 		this.showSettings = this.showSettings.bind(this);
 		this.setSetting = this.setSetting.bind(this);
+		this.showCustomize = this.showCustomize.bind(this);
 	
 		AsyncStorage.getItem("characters", (error, result) => {
 			if(result && !error) this.setState({characters: JSON.parse(result), showText: true});
+		});
+		AsyncStorage.getItem("traits", (error, result) => {
+			if(result && !error) this.setState({customTraits: JSON.parse(result)});
 		});
 	}
 	
@@ -403,7 +433,7 @@ export default class App extends React.Component {
 		if(!this.mutex.isLocked()){
 			this.mutex.acquire().then(release=>{
 				this.saveCharacter();
-				var newChar = generator(this.state[settingsPage]);
+				var newChar = generator(this.state[settingsPage], this.state.customTraits);
 				var newArray = this.state.characters.concat(newChar);
 			
 				this.setState({
@@ -522,6 +552,12 @@ export default class App extends React.Component {
 	}
 	
 	
+	// displys the settings modal when the user clicks the gear icon
+	showCustomize(show) {
+		this.setState({customizeVisible: show});
+	}
+	
+	
 	// sets the given setting to the given value
 	// note this could cause loss of data if multiple setStates are stacked, but that's almost impossible for our application
 	setSetting(name, value, whichSetting){
@@ -539,6 +575,7 @@ export default class App extends React.Component {
 		if (nextAppState.match(/inactive|background/)){
 			this.saveCharacter();
 			AsyncStorage.setItem("characters", JSON.stringify(this.state.characters));
+			AsyncStorage.setItem("traits", JSON.stringify(this.state.customTraits));
 		}
 	} 
 	
@@ -560,6 +597,13 @@ export default class App extends React.Component {
 		AppState.removeEventListener('change', this._handleAppStateChange);
 		this.keyboardDidShowListener.remove();
 		this.keyboardDidHideListener.remove();
+	}
+
+	getCheckbox(bool){
+		var checkBox = require('./src/empty_checkbox.png');
+		if(bool) checkBox = require('./src/full_checkbox.png');
+		
+		return checkBox;
 	}
 	
 	
@@ -591,7 +635,7 @@ export default class App extends React.Component {
 		smallButton: {
 			width: 70,
 			height: 70,
-			marginTop: 60,
+			marginTop: 40,
 			marginRight: 'auto',
 			marginLeft: 'auto',
 			resizeMode: 'contain',
@@ -607,20 +651,20 @@ export default class App extends React.Component {
 		//left side of new+ sign 
 		bigButtonLeft: {
 			width: 147,
-			height: 200,
+			height: 140,
 			resizeMode: 'contain',
 		},
 		
 		//right side of new+ sign
 		bigButtonRight: {
 			width: 53,
-			height: 200,
+			height: 120,
 			resizeMode: 'contain',
 		},
 		
 		belowTopBar: {
 			width: '100%',
-			height: this.d.height - 200,
+			height: this.d.height - 140,
 			flexDirection: 'row',
 			paddingBottom: 50
 		},
@@ -699,6 +743,7 @@ export default class App extends React.Component {
 		modalScroll: {
 			width: '100%',
 			marginBottom: 25,
+			marginTop: 27,
 			paddingLeft: 23,
 			paddingRight: 23
 		},
@@ -731,6 +776,14 @@ export default class App extends React.Component {
 			justifyContent: 'space-between',
 			flexDirection: 'row', 
 			overflow: 'hidden'
+		},
+
+		visible: {
+			display: 'flex'
+		},
+
+		hidden: {
+			display: 'none'
 		},
 		
 		modalSettingLabel: {

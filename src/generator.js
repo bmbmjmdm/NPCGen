@@ -1,15 +1,16 @@
-var abilities = require('./Abilities.js').placeholder;  
-var accents = require('./Accent.js').placeholder;  
-var appearances = require('./Appearance.js').placeholder;  
-var classes = require('./Class.js').placeholder;  
-var equipment = require('./Equipment.js').placeholder;  
-var names = require('./Name.js').placeholder; 
-var personalities = require('./Personality.js').placeholder;  
-var races = require('./Race.js').placeholder;
+var abilities;  
+var accents;  
+var appearances;  
+var classes;  
+var equipment;  
+var names; 
+var personalities;  
+var races;
 
 logsOn = false;
 
-export default function generate(settings){
+export default function generate(settings, custom){
+	setTraits(custom)
 	//create character sheet components
 	var charSheet = {};
 	charSheet.properties = [];
@@ -24,6 +25,17 @@ export default function generate(settings){
 	getName(charSheet, settings);
 	
 	return charSheet.file;
+}
+
+function setTraits (custom) {
+	abilities = require('./Abilities.js').placeholder.concat(custom.abilities);  
+	accents = require('./Accent.js').placeholder.concat(custom.accents);  
+	appearances = require('./Appearance.js').placeholder.concat(custom.appearances);  
+	classes = require('./Class.js').placeholder.concat(custom.classes);  
+	equipment = require('./Equipment.js').placeholder.concat(custom.equipment);  
+	names = require('./Name.js').placeholder; 
+	personalities = require('./Personality.js').placeholder.concat(custom.personalities);  
+	races = require('./Race.js').placeholder.concat(custom.races);
 }
 
 
