@@ -3,7 +3,7 @@ import {View, TextInput, ImageBackground, TouchableOpacity, Image, StyleSheet, S
 import generator from './src/generator.js'
 import {Mutex, MutexInterface} from 'async-mutex'
 import MultiSelect from 'react-native-multiple-select';
-import { v4 as uuid } from 'uuid';
+import uuid from 'react-native-uuid'
 
 export default class App extends React.Component {
 	
@@ -556,6 +556,7 @@ export default class App extends React.Component {
 								/>
 							</View>
 							<MultiSelect
+								hideTags
 								items={this.state.customTraits.classes.concat(require('./src/Class.js').placeholder)}
 								uniqueKey="Name"
 								onSelectedItemsChange={ selectedItems => this.setState({ newTrait: {...this.state.newTrait, classReq: selectedItems} }) }
@@ -563,6 +564,24 @@ export default class App extends React.Component {
 								selectText="Class Specific"
 								displayKey="Name"
 								submitButtonText="Done"
+								styleMainWrapper={this.styles.multiSelect}
+								styleDropdownMenuSubsection = {this.styles.multiSelectBackground}
+								styleTextDropdown={this.styles.multiSelectText}
+								styleTextDropdownSelected={this.styles.multiSelectTextSmall}
+							/>
+							<MultiSelect
+								hideTags
+								items={this.state.customTraits.races.concat(require('./src/Race.js').placeholder)}
+								uniqueKey="Name"
+								onSelectedItemsChange={ selectedItems => this.setState({ newTrait: {...this.state.newTrait, raceReq: selectedItems} }) }
+								selectedItems={this.state.newTrait.raceReq}
+								selectText="Race Specific"
+								displayKey="Name"
+								submitButtonText="Done"
+								styleMainWrapper={this.styles.multiSelect}
+								styleDropdownMenuSubsection = {this.styles.multiSelectBackground}
+								styleTextDropdown={this.styles.multiSelectText}
+								styleTextDropdownSelected={this.styles.multiSelectTextSmall}
 							/>
 							<View style={this.styles.modalSettingContainer}>
 								<TouchableOpacity
@@ -746,8 +765,6 @@ export default class App extends React.Component {
 	editTrait (item, index) {
 		// remember index so we can update it
 		this.setState({modifyingTrait: index})
-		console.log(item)
-		console.log(index)
 		// convert generator-usable trait into editable trait
 		if (this.state.customizePage === 'personalities') {
 			this.setState({
@@ -1074,7 +1091,7 @@ export default class App extends React.Component {
 	saveTrait () {
 		// generate a unique id to represent this trait. this will be used to ensure its not duplicated in a character
 		// as well as allows other traits to rely on it 
-		let id = uuid()
+		let id = uuid.v4()
 		if (this.state.customizePage === "editPersonality") {
 			//validate
 			if (!this.state.newTrait.Name) return
@@ -1242,6 +1259,7 @@ export default class App extends React.Component {
 			height: 50,
 			fontSize: 16,
 			borderWidth: 1,
+			borderColor: '#ffffff',
 			color: '#ffffff',
 		},
 		
@@ -1443,6 +1461,24 @@ export default class App extends React.Component {
 			height: 30,
 			resizeMode: 'stretch',
 			opacity: 1
+		},
+
+		multiSelect: {
+			marginTop: 15,
+		},
+
+		multiSelectBackground: {
+			backgroundColor: 'transparent'
+		},
+
+		multiSelectText: {
+			color: '#ffffff',
+			fontSize: 20,
+		},
+
+		multiSelectTextSmall: {
+			color: '#ffffff',
+			fontSize: 14,
 		},
 	});
 	
