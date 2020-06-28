@@ -2,7 +2,8 @@ import React from 'react';
 import {View, TextInput, ImageBackground, TouchableOpacity, Image, StyleSheet, ScrollView, Text, Keyboard, FlatList, AppState, AsyncStorage, Modal, Picker, Dimensions}  from 'react-native';
 import generator from './src/generator.js'
 import {Mutex, MutexInterface} from 'async-mutex'
-
+import MultiSelect from 'react-native-multiple-select';
+import { v4 as uuid } from 'uuid';
 
 export default class App extends React.Component {
 	
@@ -55,28 +56,9 @@ export default class App extends React.Component {
 									<Picker.Item label="4" value={4} />
 								</Picker>
 							</View>
-							
-							<View style={this.styles.modalSettingContainer}>
-								<Text style={this.styles.modalSettingLabel}>Race</Text>
-								<Picker
-									selectedValue={this.state[this.state.settingsPage].Race}
-									style={this.styles.modalSettingPicker}
-									onValueChange={(itemValue, itemIndex) => this.setSetting("Race", itemValue, this.state.settingsPage)}
-									mode="dropdown" >
-									
-									<Picker.Item label="Any" value="Any" />
-									<Picker.Item label="Dragonborn" value="Dragonborn" />
-									<Picker.Item label="Dwarf" value="Dwarf" />
-									<Picker.Item label="Elf" value="Elf" />
-									<Picker.Item label="Gnome" value="Gnome" />
-									<Picker.Item label="Half-Elf" value="Half-Elf" />
-									<Picker.Item label="Halfling" value="Halfling" />
-									<Picker.Item label="Half-Orc" value="Half-Orc" />
-									<Picker.Item label="Human" value="Human" />
-									<Picker.Item label="Seafolk" value="Seafolk" />
-									<Picker.Item label="Tabaxi" value="Tabaxi" />
-									<Picker.Item label="Tiefling" value="Tiefling" />
-								</Picker>
+						
+							<View style={[this.styles.modalSettingContainer, this.state[this.state.settingsPage].Level > 0 ? this.styles.hidden : this.styles.visible]}>
+								<Text style={this.styles.modalSettingLabel}>Level 0 NPCs have no class!</Text>
 							</View>
 						
 							<View style={[this.styles.modalSettingContainer, this.state[this.state.settingsPage].Level > 0 ? this.styles.visible : this.styles.hidden]}>
@@ -103,15 +85,34 @@ export default class App extends React.Component {
 									<Picker.Item label="Wizard" value="Wizard" />
 								</Picker>
 							</View>
-						
-							<View style={[this.styles.modalSettingContainer, this.state[this.state.settingsPage].Level > 0 ? this.styles.hidden : this.styles.visible]}>
-								<Text style={this.styles.modalSettingLabel}>Level 0 NPCs have no class!</Text>
+							
+							<View style={this.styles.modalSettingContainer}>
+								<Text style={this.styles.modalSettingLabel}>Race</Text>
+								<Picker
+									selectedValue={this.state[this.state.settingsPage].Race}
+									style={this.styles.modalSettingPicker}
+									onValueChange={(itemValue, itemIndex) => this.setSetting("Race", itemValue, this.state.settingsPage)}
+									mode="dropdown" >
+									
+									<Picker.Item label="Any" value="Any" />
+									<Picker.Item label="Dragonborn" value="Dragonborn" />
+									<Picker.Item label="Dwarf" value="Dwarf" />
+									<Picker.Item label="Elf" value="Elf" />
+									<Picker.Item label="Gnome" value="Gnome" />
+									<Picker.Item label="Half-Elf" value="Half-Elf" />
+									<Picker.Item label="Halfling" value="Halfling" />
+									<Picker.Item label="Half-Orc" value="Half-Orc" />
+									<Picker.Item label="Human" value="Human" />
+									<Picker.Item label="Seafolk" value="Seafolk" />
+									<Picker.Item label="Tabaxi" value="Tabaxi" />
+									<Picker.Item label="Tiefling" value="Tiefling" />
+								</Picker>
 							</View>
 
-							<View style={this.styles.modalHeaderContainer}>
-								<Text style={this.styles.modalHeaderLabel}>Use Custom Traits</Text>
+							<View style={this.styles.modalSettingContainer}>
+								<Text style={this.styles.modalSettingLabel}>Use Custom Traits</Text>
 								<TouchableOpacity onPress={() => this.setSetting("useCustomTraits", !this.state[this.state.settingsPage].useCustomTraits, this.state.settingsPage)} activeOpacity={0.5}>
-									<Image style={this.styles.modalHeaderInput} source={this.getCheckbox(this.state[this.state.settingsPage].useCustomTraits)}></Image>
+									<Image style={this.styles.modalSettingCheckbox} source={this.getCheckbox(this.state[this.state.settingsPage].useCustomTraits)}></Image>
 								</TouchableOpacity>
 							</View>
 							
@@ -189,10 +190,397 @@ export default class App extends React.Component {
 						imageStyle={this.styles.modalImage}
 						style={this.styles.modalContent}>
 						
-						<ScrollView style={this.styles.modalScroll}>
+						<ScrollView style={[this.styles.modalScroll, this.state.customizePage == 'default' ? this.styles.visible : this.styles.hidden]}>
+							<TouchableOpacity
+								activeOpacity={0.5}
+								onPress={() => this.setState({customizePage: 'personalities'})}>
+								<ImageBackground
+									source={require('./src/eye.png')}
+									imageStyle={this.styles.modalImage}
+									style={this.styles.eyeButton}>
+										<Text style={this.styles.modalSettingLabel}>Personalities</Text>
+								</ImageBackground>
+							</TouchableOpacity>
+							<TouchableOpacity
+								activeOpacity={0.5}
+								onPress={() => this.setState({customizePage: 'appearences'})}>
+								<ImageBackground
+									source={require('./src/eye.png')}
+									imageStyle={this.styles.modalImage}
+									style={this.styles.eyeButton}>
+										<Text style={this.styles.modalSettingLabel}>Appearences</Text>
+								</ImageBackground>
+							</TouchableOpacity>
+							<TouchableOpacity
+								activeOpacity={0.5}
+								onPress={() => this.setState({customizePage: 'equipment'})}>
+								<ImageBackground
+									source={require('./src/eye.png')}
+									imageStyle={this.styles.modalImage}
+									style={this.styles.eyeButton}>
+										<Text style={this.styles.modalSettingLabel}>Equipment</Text>
+								</ImageBackground>
+							</TouchableOpacity>
+							<TouchableOpacity
+								activeOpacity={0.5}
+								onPress={() => this.setState({customizePage: 'accents'})}>
+								<ImageBackground
+									source={require('./src/eye.png')}
+									imageStyle={this.styles.modalImage}
+									style={this.styles.eyeButton}>
+										<Text style={this.styles.modalSettingLabel}>Accents</Text>
+								</ImageBackground>
+							</TouchableOpacity>
+							<TouchableOpacity
+								activeOpacity={0.5}
+								onPress={() => this.setState({customizePage: 'abilities'})}>
+								<ImageBackground
+									source={require('./src/eye.png')}
+									imageStyle={this.styles.modalImage}
+									style={this.styles.eyeButton}>
+										<Text style={this.styles.modalSettingLabel}>Abilities</Text>
+								</ImageBackground>
+							</TouchableOpacity>
+							<TouchableOpacity
+								activeOpacity={0.5}
+								onPress={() => this.setState({customizePage: 'races'})}>
+								<ImageBackground
+									source={require('./src/eye.png')}
+									imageStyle={this.styles.modalImage}
+									style={this.styles.eyeButton}>
+										<Text style={this.styles.modalSettingLabel}>Races</Text>
+								</ImageBackground>
+							</TouchableOpacity>
+							<TouchableOpacity
+								activeOpacity={0.5}
+								onPress={() => this.setState({customizePage: 'classes'})}>
+								<ImageBackground
+									source={require('./src/eye.png')}
+									imageStyle={this.styles.modalImage}
+									style={this.styles.eyeButton}>
+										<Text style={this.styles.modalSettingLabel}>Classes</Text>
+								</ImageBackground>
+							</TouchableOpacity>
 						</ScrollView>
+
+						<View style={[this.styles.modalScroll, this.state.customizePage == 'personalities' ? this.styles.visible : this.styles.hidden]}>
+							<TouchableOpacity
+								activeOpacity={0.5}
+								style={this.styles.backButton}
+								onPress={() => this.setState({customizePage: 'default'})}>
+								<Text style={this.styles.modalSettingButton}>Back</Text>
+							</TouchableOpacity>
+							<TouchableOpacity
+								activeOpacity={0.5}
+								onPress={() => this.setState({customizePage: 'editPersonality', newTrait: {Name: ""}, modifyingTrait: -1})}>
+								<ImageBackground
+									source={require('./src/eye_red.png')}
+									imageStyle={this.styles.modalImage}
+									style={this.styles.eyeButton}>
+										<Text style={this.styles.modalSettingLabel}>New</Text>
+								</ImageBackground>
+							</TouchableOpacity>
+							<FlatList
+								data={this.state.customTraits.personalities}
+								keyExtractor={this._keyCustomTraits}
+								renderItem={this._renderCustomTraits}
+								style={this.styles.existingTraits}
+								extraData={this.state.customTraits}
+							/>
+						</View>
+
+						<ScrollView style={[this.styles.modalScroll, this.state.customizePage == 'editPersonality' ? this.styles.visible : this.styles.hidden]}>
+							<TouchableOpacity
+								activeOpacity={0.5}
+								style={this.styles.backButton}
+								onPress={() => this.setState({customizePage: 'personalities', modifyingTrait: -1, newTrait: {}})}>
+								<Text style={this.styles.modalSettingButton}>Back</Text>
+							</TouchableOpacity>							
+							<View style={this.styles.customizeSettingContainer}>
+								<Text style={this.styles.modalSettingLabel}>Name</Text>
+								<TextInput
+									style={this.styles.customizeTextInput}
+									value={this.state.newTrait.Name}
+									onChangeText={(value) => this.setSetting('Name', value, 'newTrait')}
+									multiline={false}
+									underlineColorAndroid='transparent'
+								/>
+							</View>
+							<View style={this.styles.modalSettingContainer}>
+								<TouchableOpacity
+									activeOpacity={0.5}
+									style={this.styles.saveButton}
+									onPress={this.saveTrait}>
+									<Text style={this.styles.modalSettingButton}>Save</Text>
+								</TouchableOpacity>
+								<TouchableOpacity
+									activeOpacity={0.5}
+									style={[this.styles.deleteButton, this.state.modifyingTrait > -1 ? this.styles.visible : this.styles.hidden]}
+									onPress={this.deleteTrait}>
+									<Text style={this.styles.modalSettingButtonRed}>Delete</Text>
+								</TouchableOpacity>
+							</View>
+						</ScrollView>
+
+						<View style={[this.styles.modalScroll, this.state.customizePage == 'appearences' ? this.styles.visible : this.styles.hidden]}>
+							<TouchableOpacity
+								activeOpacity={0.5}
+								style={this.styles.backButton}
+								onPress={() => this.setState({customizePage: 'default'})}>
+								<Text style={this.styles.modalSettingButton}>Back</Text>
+							</TouchableOpacity>
+							<TouchableOpacity
+								activeOpacity={0.5}
+								onPress={() => this.setState({customizePage: 'editAppearence', newTrait: {Name: ""}, modifyingTrait: -1})}>
+								<ImageBackground
+									source={require('./src/eye_red.png')}
+									imageStyle={this.styles.modalImage}
+									style={this.styles.eyeButton}>
+										<Text style={this.styles.modalSettingLabel}>New</Text>
+								</ImageBackground>
+							</TouchableOpacity>
+							<FlatList
+								data={this.state.customTraits.appearences}
+								keyExtractor={this._keyCustomTraits}
+								renderItem={this._renderCustomTraits}
+								style={this.styles.existingTraits}
+								extraData={this.state.customTraits}
+							/>
+						</View>
+
+						<ScrollView style={[this.styles.modalScroll, this.state.customizePage == 'editAppearence' ? this.styles.visible : this.styles.hidden]}>
+							<TouchableOpacity
+								activeOpacity={0.5}
+								style={this.styles.backButton}
+								onPress={() => this.setState({customizePage: 'appearences', modifyingTrait: -1, newTrait: {}})}>
+								<Text style={this.styles.modalSettingButton}>Back</Text>
+							</TouchableOpacity>							
+							<View style={this.styles.customizeSettingContainer}>
+								<Text style={this.styles.modalSettingLabel}>Name</Text>
+								<TextInput
+									style={this.styles.customizeTextInput}
+									value={this.state.newTrait.Name}
+									onChangeText={(value) => this.setSetting('Name', value, 'newTrait')}
+									multiline={false}
+									underlineColorAndroid='transparent'
+								/>
+							</View>
+							<View style={this.styles.modalSettingContainer}>
+								<TouchableOpacity
+									activeOpacity={0.5}
+									style={this.styles.saveButton}
+									onPress={this.saveTrait}>
+									<Text style={this.styles.modalSettingButton}>Save</Text>
+								</TouchableOpacity>
+								<TouchableOpacity
+									activeOpacity={0.5}
+									style={[this.styles.deleteButton, this.state.modifyingTrait > -1 ? this.styles.visible : this.styles.hidden]}
+									onPress={this.deleteTrait}>
+									<Text style={this.styles.modalSettingButtonRed}>Delete</Text>
+								</TouchableOpacity>
+							</View>
+						</ScrollView>
+						
+
+						<View style={[this.styles.modalScroll, this.state.customizePage == 'accents' ? this.styles.visible : this.styles.hidden]}>
+							<TouchableOpacity
+								activeOpacity={0.5}
+								style={this.styles.backButton}
+								onPress={() => this.setState({customizePage: 'default'})}>
+								<Text style={this.styles.modalSettingButton}>Back</Text>
+							</TouchableOpacity>
+							<TouchableOpacity
+								activeOpacity={0.5}
+								onPress={() => this.setState({customizePage: 'editAccent', newTrait: {Name: ""}, modifyingTrait: -1})}>
+								<ImageBackground
+									source={require('./src/eye_red.png')}
+									imageStyle={this.styles.modalImage}
+									style={this.styles.eyeButton}>
+										<Text style={this.styles.modalSettingLabel}>New</Text>
+								</ImageBackground>
+							</TouchableOpacity>
+							<FlatList
+								data={this.state.customTraits.accents}
+								keyExtractor={this._keyCustomTraits}
+								renderItem={this._renderCustomTraits}
+								style={this.styles.existingTraits}
+								extraData={this.state.customTraits}
+							/>
+						</View>
+
+						<ScrollView style={[this.styles.modalScroll, this.state.customizePage == 'editAccent' ? this.styles.visible : this.styles.hidden]}>
+							<TouchableOpacity
+								activeOpacity={0.5}
+								style={this.styles.backButton}
+								onPress={() => this.setState({customizePage: 'accents', modifyingTrait: -1, newTrait: {}})}>
+								<Text style={this.styles.modalSettingButton}>Back</Text>
+							</TouchableOpacity>							
+							<View style={this.styles.customizeSettingContainer}>
+								<Text style={this.styles.modalSettingLabel}>Name</Text>
+								<TextInput
+									style={this.styles.customizeTextInput}
+									value={this.state.newTrait.Name}
+									onChangeText={(value) => this.setSetting('Name', value, 'newTrait')}
+									multiline={false}
+									underlineColorAndroid='transparent'
+								/>
+							</View>
+							<View style={this.styles.modalSettingContainer}>
+								<TouchableOpacity
+									activeOpacity={0.5}
+									style={this.styles.saveButton}
+									onPress={this.saveTrait}>
+									<Text style={this.styles.modalSettingButton}>Save</Text>
+								</TouchableOpacity>
+								<TouchableOpacity
+									activeOpacity={0.5}
+									style={[this.styles.deleteButton, this.state.modifyingTrait > -1 ? this.styles.visible : this.styles.hidden]}
+									onPress={this.deleteTrait}>
+									<Text style={this.styles.modalSettingButtonRed}>Delete</Text>
+								</TouchableOpacity>
+							</View>
+						</ScrollView>
+						
+
+						<View style={[this.styles.modalScroll, this.state.customizePage == 'accents' ? this.styles.visible : this.styles.hidden]}>
+							<TouchableOpacity
+								activeOpacity={0.5}
+								style={this.styles.backButton}
+								onPress={() => this.setState({customizePage: 'default'})}>
+								<Text style={this.styles.modalSettingButton}>Back</Text>
+							</TouchableOpacity>
+							<TouchableOpacity
+								activeOpacity={0.5}
+								onPress={() => this.setState({customizePage: 'editAccent', newTrait: {Name: ""}, modifyingTrait: -1})}>
+								<ImageBackground
+									source={require('./src/eye_red.png')}
+									imageStyle={this.styles.modalImage}
+									style={this.styles.eyeButton}>
+										<Text style={this.styles.modalSettingLabel}>New</Text>
+								</ImageBackground>
+							</TouchableOpacity>
+							<FlatList
+								data={this.state.customTraits.accents}
+								keyExtractor={this._keyCustomTraits}
+								renderItem={this._renderCustomTraits}
+								style={this.styles.existingTraits}
+								extraData={this.state.customTraits}
+							/>
+						</View>
+
+						<ScrollView style={[this.styles.modalScroll, this.state.customizePage == 'editAccent' ? this.styles.visible : this.styles.hidden]}>
+							<TouchableOpacity
+								activeOpacity={0.5}
+								style={this.styles.backButton}
+								onPress={() => this.setState({customizePage: 'accents', modifyingTrait: -1, newTrait: {}})}>
+								<Text style={this.styles.modalSettingButton}>Back</Text>
+							</TouchableOpacity>							
+							<View style={this.styles.customizeSettingContainer}>
+								<Text style={this.styles.modalSettingLabel}>Name</Text>
+								<TextInput
+									style={this.styles.customizeTextInput}
+									value={this.state.newTrait.Name}
+									onChangeText={(value) => this.setSetting('Name', value, 'newTrait')}
+									multiline={false}
+									underlineColorAndroid='transparent'
+								/>
+							</View>
+							<View style={this.styles.modalSettingContainer}>
+								<TouchableOpacity
+									activeOpacity={0.5}
+									style={this.styles.saveButton}
+									onPress={this.saveTrait}>
+									<Text style={this.styles.modalSettingButton}>Save</Text>
+								</TouchableOpacity>
+								<TouchableOpacity
+									activeOpacity={0.5}
+									style={[this.styles.deleteButton, this.state.modifyingTrait > -1 ? this.styles.visible : this.styles.hidden]}
+									onPress={this.deleteTrait}>
+									<Text style={this.styles.modalSettingButtonRed}>Delete</Text>
+								</TouchableOpacity>
+							</View>
+						</ScrollView>
+						
+
+						<View style={[this.styles.modalScroll, this.state.customizePage == 'abilities' ? this.styles.visible : this.styles.hidden]}>
+							<TouchableOpacity
+								activeOpacity={0.5}
+								style={this.styles.backButton}
+								onPress={() => this.setState({customizePage: 'default'})}>
+								<Text style={this.styles.modalSettingButton}>Back</Text>
+							</TouchableOpacity>
+							<TouchableOpacity
+								activeOpacity={0.5}
+								onPress={() => this.setState({customizePage: 'editAbility', newTrait: {Name: "", description: "", classReq: [], raceReq: []}, modifyingTrait: -1})}>
+								<ImageBackground
+									source={require('./src/eye_red.png')}
+									imageStyle={this.styles.modalImage}
+									style={this.styles.eyeButton}>
+										<Text style={this.styles.modalSettingLabel}>New</Text>
+								</ImageBackground>
+							</TouchableOpacity>
+							<FlatList
+								data={this.state.customTraits.abilities}
+								keyExtractor={this._keyCustomTraits}
+								renderItem={this._renderCustomTraits}
+								style={this.styles.existingTraits}
+								extraData={this.state.customTraits}
+							/>
+						</View>
+
+						<ScrollView style={[this.styles.modalScroll, this.state.customizePage == 'editAbility' ? this.styles.visible : this.styles.hidden]}>
+							<TouchableOpacity
+								activeOpacity={0.5}
+								style={this.styles.backButton}
+								onPress={() => this.setState({customizePage: 'abilities', modifyingTrait: -1, newTrait: {}})}>
+								<Text style={this.styles.modalSettingButton}>Back</Text>
+							</TouchableOpacity>
+							<View style={this.styles.customizeSettingContainer}>
+								<Text style={this.styles.modalSettingLabel}>Name</Text>
+								<TextInput
+									style={this.styles.customizeTextInput}
+									value={this.state.newTrait.Name}
+									onChangeText={(value) => this.setSetting('Name', value, 'newTrait')}
+									multiline={false}
+									underlineColorAndroid='transparent'
+								/>
+							</View>
+							<View style={this.styles.customizeSettingContainer}>
+								<Text style={this.styles.modalSettingLabel}>Description</Text>
+								<TextInput
+									style={this.styles.customizeTextInput}
+									value={this.state.newTrait.description}
+									onChangeText={(value) => this.setSetting('description', value, 'newTrait')}
+									multiline={false}
+									underlineColorAndroid='transparent'
+								/>
+							</View>
+							<MultiSelect
+								items={this.state.customTraits.classes.concat(require('./src/Class.js').placeholder)}
+								uniqueKey="Name"
+								onSelectedItemsChange={ selectedItems => this.setState({ newTrait: {...this.state.newTrait, classReq: selectedItems} }) }
+								selectedItems={this.state.newTrait.classReq}
+								selectText="Class Specific"
+								displayKey="Name"
+								submitButtonText="Done"
+							/>
+							<View style={this.styles.modalSettingContainer}>
+								<TouchableOpacity
+									activeOpacity={0.5}
+									style={this.styles.saveButton}
+									onPress={this.saveTrait}>
+									<Text style={this.styles.modalSettingButton}>Save</Text>
+								</TouchableOpacity>
+								<TouchableOpacity
+									activeOpacity={0.5}
+									style={[this.styles.deleteButton, this.state.modifyingTrait > -1 ? this.styles.visible : this.styles.hidden]}
+									onPress={this.deleteTrait}>
+									<Text style={this.styles.modalSettingButtonRed}>Delete</Text>
+								</TouchableOpacity>
+							</View>
+						</ScrollView>
+
 					</ImageBackground>
-					
 				</Modal>
 				
 				<View style={this.styles.topBar}>
@@ -237,8 +625,8 @@ export default class App extends React.Component {
 					<FlatList
 						data={this.state.characters}
 						extraData={this.state.index}
-						keyExtractor={this._keyExtractor}
-						renderItem={this._renderItem}
+						keyExtractor={this._keyCharacterShield}
+						renderItem={this._renderCharacterShield}
 						ref={component => this._listScroll = component}
 						style={this.styles.leftBar}
 					/>
@@ -266,39 +654,65 @@ export default class App extends React.Component {
 	}
 	
 	//helper function for rendering list of characters
-	_renderItem = ({item, index}) => {
+	_renderCharacterShield = ({item, index}) => {
 		var crestSrc = require('./src/crest.png');
 		if(index == this.state.index) crestSrc = require('./src/crestHighlight.png');
 		
 		return (
 		<FlatListItem myIndex={index} stateIndex={this.state.index}>
-		<TouchableOpacity
-			onPress={() => this.showCharacter(index, true)}
-			style={this.styles.listButton}
-			shouldRasterizeIOS={true}
-			renderToHardwareTextureAndroid={true}>
+			<TouchableOpacity
+				onPress={() => this.showCharacter(index, true)}
+				style={this.styles.listButton}
+				shouldRasterizeIOS={true}
+				renderToHardwareTextureAndroid={true}>
 
-			<ImageBackground
-				source={crestSrc}
-				imageStyle={this.styles.listImage}
-				style={this.styles.listBackground}>
-					
-				<Text 
-					style={this.styles.listText}
-					numberOfLines={3}
-					textBreakStrategy='simple'>
-					{this.getDisplayName(item)}
-				</Text>
-			
-			</ImageBackground>
-		</TouchableOpacity>
+				<ImageBackground
+					source={crestSrc}
+					imageStyle={this.styles.listImage}
+					style={this.styles.listBackground}>
+						
+					<Text 
+						style={this.styles.listText}
+						numberOfLines={3}
+						textBreakStrategy='simple'>
+						{this.getDisplayName(item)}
+					</Text>
+				
+				</ImageBackground>
+			</TouchableOpacity>
 		</FlatListItem>
 		);
 	}
 	
 	//helper function for getting keys for character list
-	_keyExtractor = (item, index) => {
+	_keyCharacterShield = (item, index) => {
 		return this.hashCode(item)+"";
+	}
+
+	//helper function for rendering list of custom traits
+	_renderCustomTraits = ({item, index}) => {		
+		return (
+		<FlatListItemTraits>
+			<TouchableOpacity
+				activeOpacity={0.5}
+				onPress={() => this.editTrait(item, index)}>
+				<ImageBackground
+					source={require('./src/eye.png')}
+					imageStyle={this.styles.modalImage}
+					style={this.styles.eyeButton}>
+						<Text style={this.styles.modalSettingLabel}>{item.Name || item}</Text>
+				</ImageBackground>
+			</TouchableOpacity>
+		</FlatListItemTraits>
+		);
+	}
+	
+	//helper function for getting keys for custom traits list
+	// assumes all custom traits have a Name prop
+	_keyCustomTraits = (item, index) => {
+		let str = item
+		if (item.Name) str = item.Name
+		return this.hashCode(str)+"";
 	}
 	
 	//helper function for determining list item keys
@@ -328,6 +742,38 @@ export default class App extends React.Component {
 			return nameArr[0].trim().split(' ')[0].trim().slice(0, 10);
 		}
 	};
+
+	editTrait (item, index) {
+		// remember index so we can update it
+		this.setState({modifyingTrait: index})
+		console.log(item)
+		console.log(index)
+		// convert generator-usable trait into editable trait
+		if (this.state.customizePage === 'personalities') {
+			this.setState({
+				newTrait: {
+					Name: item.Name
+				},
+				customizePage: "editPersonality"
+			})
+		}
+		if (this.state.customizePage === 'appearences') {
+			this.setState({
+				newTrait: {
+					Name: item.Name
+				},
+				customizePage: "editAppearence"
+			})
+		}
+		if (this.state.customizePage === 'accents') {
+			this.setState({
+				newTrait: {
+					Name: item
+				},
+				customizePage: "editAccent"
+			})
+		}
+	}
 	
 	
 	//helper function to underline "New" in modal
@@ -378,14 +824,17 @@ export default class App extends React.Component {
 			showText: false,
 			settingsVisible: false,
 			customizeVisible: false,
+			modifyingTrait: -1,
+			customizePage: 'default',
+			newTrait: {},
 			customTraits: {
-				personalities: [], // name
-				accents: [], // name
-				appearences: [], // name
-				equipment: [], // name, description (optional), class req (optional, checklist, pulls from customs too)
-				abilities: [], // name, description (optional), class req (optional, checklist, pulls from customs too)
-				races: [], // name, stat buff major (dropdown), stat buff minor (dropdown), ability (string)
-				classes: [], // name, stat req major (dropdown), stat req minor (dropdown), ability (string), weapon (dropdown), armor (dropdown)
+				personalities: [], // Name
+				accents: [], // Name
+				appearences: [], // Name
+				equipment: [], // Name, description (optional), class req (optional, checklist, pulls from customs too)
+				abilities: [], // Name, description (optional), class req (optional, checklist, pulls from customs too)
+				races: [], // Name, stat buff major (dropdown), stat buff minor (dropdown), ability (string)
+				classes: [], // Name, stat req major (dropdown), stat req minor (dropdown), ability (string), weapon (dropdown), armor (dropdown)
 			},
 			settingsPage: "settingsNew",
 			settingsNew: {
@@ -416,13 +865,15 @@ export default class App extends React.Component {
 		this.showSettings = this.showSettings.bind(this);
 		this.setSetting = this.setSetting.bind(this);
 		this.showCustomize = this.showCustomize.bind(this);
+		this.saveTrait = this.saveTrait.bind(this);
+		this.deleteTrait = this.deleteTrait.bind(this);
 	
 		AsyncStorage.getItem("characters", (error, result) => {
 			if(result && !error) this.setState({characters: JSON.parse(result), showText: true});
-		});
+		});/*
 		AsyncStorage.getItem("traits", (error, result) => {
 			if(result && !error) this.setState({customTraits: JSON.parse(result)});
-		});
+		});*/
 	}
 	
 	//only 1 function may run at once
@@ -433,7 +884,20 @@ export default class App extends React.Component {
 		if(!this.mutex.isLocked()){
 			this.mutex.acquire().then(release=>{
 				this.saveCharacter();
-				var newChar = generator(this.state[settingsPage], this.state.customTraits);
+				// default empty custom traits
+				let additionalTraits = {
+					personalities: [],
+					accents: [],
+					appearences: [], 
+					equipment: [],
+					abilities: [],
+					races: [],
+					classes: [],
+				}
+				// user enabled custom traits, fetch them
+				if (this.state[settingsPage].useCustomTraits) additionalTraits = this.state.customTraits
+				// generate given our options
+				var newChar = generator(this.state[settingsPage], additionalTraits);
 				var newArray = this.state.characters.concat(newChar);
 			
 				this.setState({
@@ -555,6 +1019,7 @@ export default class App extends React.Component {
 	// displys the settings modal when the user clicks the gear icon
 	showCustomize(show) {
 		this.setState({customizeVisible: show});
+		this.setState({customizePage: 'default'});
 	}
 	
 	
@@ -604,6 +1069,94 @@ export default class App extends React.Component {
 		if(bool) checkBox = require('./src/full_checkbox.png');
 		
 		return checkBox;
+	}
+
+	saveTrait () {
+		// generate a unique id to represent this trait. this will be used to ensure its not duplicated in a character
+		// as well as allows other traits to rely on it 
+		let id = uuid()
+		if (this.state.customizePage === "editPersonality") {
+			//validate
+			if (!this.state.newTrait.Name) return
+			//this means we're editing a trait, remove the old one
+			if (this.state.modifyingTrait > -1) {
+				// preserve the id
+				id = this.state.customTraits.personalities[this.state.modifyingTrait].id
+				this.state.customTraits.personalities.splice(this.state.modifyingTrait, 1)
+			}
+			//add the new trait/version
+			this.state.customTraits.personalities.unshift({
+				Reroll: 0,
+				Description: this.state.newTrait.Name,
+				Properties: [],
+				Incompatible: [],
+				Name: this.state.newTrait.Name,
+				id,
+			})
+			let traitsClone = {
+				...this.state.customTraits
+			}
+			//go back in modal
+			this.setState({customizePage: "personalities", newTrait: {}, modifyingTrait: -1, customTraits: traitsClone})
+		}
+		if (this.state.customizePage === "editAppearence") {
+			//validate
+			if (!this.state.newTrait.Name) return
+			//this means we're editing a trait, remove the old one
+			if (this.state.modifyingTrait > -1) {
+				// preserve the id
+				id = this.state.customTraits.appearences[this.state.modifyingTrait].id
+				this.state.customTraits.appearences.splice(this.state.modifyingTrait, 1)
+			}
+			//add the new trait/version
+			this.state.customTraits.appearences.unshift({
+				Reroll: 0,
+				Description: this.state.newTrait.Name,
+				Properties: [],
+				Incompatible: [],
+				Name: this.state.newTrait.Name,
+				id,
+			})
+			let traitsClone = {
+				...this.state.customTraits
+			}
+			//go back in modal
+			this.setState({customizePage: "appearences", newTrait: {}, modifyingTrait: -1, customTraits: traitsClone})
+		}
+		if (this.state.customizePage === "editAccent") {
+			//validate
+			if (!this.state.newTrait.Name) return
+			//this means we're editing a trait, remove the old one
+			if (this.state.modifyingTrait > -1) this.state.customTraits.accents.splice(this.state.modifyingTrait, 1)
+			//add the new trait/version
+			this.state.customTraits.accents.unshift(this.state.newTrait.Name)
+			let traitsClone = {
+				...this.state.customTraits
+			}
+			//go back in modal
+			this.setState({customizePage: "accents", newTrait: {}, modifyingTrait: -1, customTraits: traitsClone})
+		}
+	}
+
+	deleteTrait () {
+		let page
+		if (this.state.customizePage === "editPersonality") {
+			this.state.customTraits.personalities.splice(this.state.modifyingTrait, 1)
+			page = "personalities"
+		}
+		if (this.state.customizePage === "editAccent") {
+			this.state.customTraits.accents.splice(this.state.modifyingTrait, 1)
+			page = "accents"
+		}
+		if (this.state.customizePage === "editAppearence") {
+			this.state.customTraits.appearences.splice(this.state.modifyingTrait, 1)
+			page = "appearences"
+		}
+		let traitsClone = {
+			...this.state.customTraits
+		}
+		//go back in modal
+		this.setState({customizePage: page, newTrait: {}, modifyingTrait: -1, customTraits: traitsClone})
 	}
 	
 	
@@ -683,10 +1236,24 @@ export default class App extends React.Component {
 			margin: 0,
 			fontSize: 16,
 		},
+
+		customizeTextInput: {
+			width: '100%', 
+			height: 50,
+			fontSize: 16,
+			borderWidth: 1,
+			color: '#ffffff',
+		},
 		
 		leftBar: {
 			flexDirection: 'column', 
 			width: '20%'
+		},
+		
+		existingTraits: {
+			flexDirection: 'column', 
+			width: '100%',
+			height: 200
 		},
 
 		listButton: {
@@ -733,7 +1300,6 @@ export default class App extends React.Component {
 			top: '50%',
 			marginTop: -187.5,
 			position: 'absolute'
-			
 		},
 		
 		modalImage: {
@@ -777,6 +1343,24 @@ export default class App extends React.Component {
 			flexDirection: 'row', 
 			overflow: 'hidden'
 		},
+		
+		customizeSettingContainer: {
+			paddingTop: 10,
+			paddingBottom: 5,
+			width: '100%',
+			flexDirection: 'column', 
+			overflow: 'hidden'
+		},
+		
+		eyeButton: {
+			margin: 10,
+			paddingRight: 15,
+			width: '100%',
+			height: 50,
+			alignItems: 'center',
+			justifyContent: 'center',
+			overflow: 'hidden'
+		},
 
 		visible: {
 			display: 'flex'
@@ -791,6 +1375,41 @@ export default class App extends React.Component {
 			textShadowColor: '#990000',
 			textShadowOffset: {width: 2, height: 2},
 			color: '#ffffff',
+		},
+
+		backButton: {
+			width: 100,
+			paddingLeft: 10,
+			paddingTop: 8,
+			marginBottom: 10,
+		},
+
+		saveButton: {
+			width: 100,
+			paddingLeft: 10,
+			paddingTop: 5,
+			marginBottom: 5,
+		},
+
+		deleteButton: {
+			width: 70,
+			paddingTop: 5,
+			marginBottom: 5,
+		},
+		
+		modalSettingButton: {
+			fontSize: 20,
+			textShadowColor: '#990000',
+			textShadowOffset: {width: 2, height: 2},
+			color: '#ffffff',
+			textDecorationLine: 'underline'
+		},
+
+		modalSettingButtonRed: {
+			fontSize: 20,
+			color: '#a21414',
+			fontWeight: 'bold',
+			textDecorationLine: 'underline'
 		},
 		
 		modalSettingPicker: {
@@ -810,13 +1429,20 @@ export default class App extends React.Component {
 			width: 80,
 			margin: 0,
 			padding: 0,
-			marginTop: -15,
-			height: 60,
+			marginTop: -8,
+			height: 40,
 			color: '#ffffff',
 			transform: [
 				{ scaleX: 1.25 }, 
 				{ scaleY: 1.25 },
 			]
+		},
+
+		modalSettingCheckbox: {
+			width: 30,
+			height: 30,
+			resizeMode: 'stretch',
+			opacity: 1
 		},
 	});
 	
@@ -841,10 +1467,21 @@ export default class App extends React.Component {
 		
 		return false;
 	}
-
-  
 }
-
+class FlatListItemTraits extends React.Component {
+	render() {
+		return (
+		<View>
+			{this.props.children}
+		</View>
+		)
+	}
+	
+	// TODO optomize 
+	shouldComponentUpdate(nextProps, nextState) {		
+		return true;
+	}
+}
 
   
   

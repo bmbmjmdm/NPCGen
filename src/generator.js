@@ -30,7 +30,7 @@ export default function generate(settings, custom){
 function setTraits (custom) {
 	abilities = require('./Abilities.js').placeholder.concat(custom.abilities);  
 	accents = require('./Accent.js').placeholder.concat(custom.accents);  
-	appearances = require('./Appearance.js').placeholder.concat(custom.appearances);  
+	appearances = require('./Appearance.js').placeholder.concat(custom.appearences);  
 	classes = require('./Class.js').placeholder.concat(custom.classes);  
 	equipment = require('./Equipment.js').placeholder.concat(custom.equipment);  
 	names = require('./Name.js').placeholder; 
