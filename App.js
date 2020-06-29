@@ -511,7 +511,7 @@ export default class App extends React.Component {
 							</TouchableOpacity>
 							<TouchableOpacity
 								activeOpacity={0.5}
-								onPress={() => this.setState({customizePage: 'editAbility', newTrait: {Name: "", description: "", classReq: [], raceReq: []}, modifyingTrait: -1})}>
+								onPress={() => this.setState({customizePage: 'editAbility', newTrait: {Name: "", description: "", classReq: [], levelReq: 0}, modifyingTrait: -1})}>
 								<ImageBackground
 									source={require('./src/eye_red.png')}
 									imageStyle={this.styles.modalImage}
@@ -555,30 +555,129 @@ export default class App extends React.Component {
 									underlineColorAndroid='transparent'
 								/>
 							</View>
+							<View style={this.styles.modalSettingContainer}>
+								<Text style={this.styles.modalSettingLabel}>Min Lvl</Text>
+								<Picker
+									selectedValue={this.state.newTrait.levelReq}
+									style={this.styles.modalSettingPickerThin}
+									onValueChange={(itemValue, itemIndex) => this.setSetting("levelReq", itemValue, 'newTrait')}
+									mode="dropdown" >
+									<Picker.Item label="0" value={0} />
+									<Picker.Item label="1" value={1} />
+									<Picker.Item label="2" value={2} />
+									<Picker.Item label="3" value={3} />
+									<Picker.Item label="4" value={4} />
+								</Picker>
+							</View>
+							{/* Read README.txt to modify MultiSelect if you just installed node_modules */}
 							<MultiSelect
 								hideTags
-								items={this.state.customTraits.classes.concat(require('./src/Class.js').placeholder)}
-								uniqueKey="Name"
+								items={this.getAllClasses().map(clas => { return {Name: clas.Name, id: clas.Properties[0]}})}
+								uniqueKey="id"
 								onSelectedItemsChange={ selectedItems => this.setState({ newTrait: {...this.state.newTrait, classReq: selectedItems} }) }
 								selectedItems={this.state.newTrait.classReq}
 								selectText="Class Specific"
 								displayKey="Name"
 								submitButtonText="Done"
-								styleMainWrapper={this.styles.multiSelect}
 								styleDropdownMenuSubsection = {this.styles.multiSelectBackground}
 								styleTextDropdown={this.styles.multiSelectText}
 								styleTextDropdownSelected={this.styles.multiSelectTextSmall}
+								searchInputStyle={this.styles.multiSelectSearch}
 							/>
+							<View style={this.styles.modalSettingContainer}>
+								<TouchableOpacity
+									activeOpacity={0.5}
+									style={this.styles.saveButton}
+									onPress={this.saveTrait}>
+									<Text style={this.styles.modalSettingButton}>Save</Text>
+								</TouchableOpacity>
+								<TouchableOpacity
+									activeOpacity={0.5}
+									style={[this.styles.deleteButton, this.state.modifyingTrait > -1 ? this.styles.visible : this.styles.hidden]}
+									onPress={this.deleteTrait}>
+									<Text style={this.styles.modalSettingButtonRed}>Delete</Text>
+								</TouchableOpacity>
+							</View>
+						</ScrollView>
+						
+
+						<View style={[this.styles.modalScroll, this.state.customizePage == 'equipment' ? this.styles.visible : this.styles.hidden]}>
+							<TouchableOpacity
+								activeOpacity={0.5}
+								style={this.styles.backButton}
+								onPress={() => this.setState({customizePage: 'default'})}>
+								<Text style={this.styles.modalSettingButton}>Back</Text>
+							</TouchableOpacity>
+							<TouchableOpacity
+								activeOpacity={0.5}
+								onPress={() => this.setState({customizePage: 'editEquipment', newTrait: {Name: "", description: "", classReq: [], levelReq: 0}, modifyingTrait: -1})}>
+								<ImageBackground
+									source={require('./src/eye_red.png')}
+									imageStyle={this.styles.modalImage}
+									style={this.styles.eyeButton}>
+										<Text style={this.styles.modalSettingLabel}>New</Text>
+								</ImageBackground>
+							</TouchableOpacity>
+							<FlatList
+								data={this.state.customTraits.equipment}
+								keyExtractor={this._keyCustomTraits}
+								renderItem={this._renderCustomTraits}
+								style={this.styles.existingTraits}
+								extraData={this.state.customTraits}
+							/>
+						</View>
+
+						<ScrollView style={[this.styles.modalScroll, this.state.customizePage == 'editEquipment' ? this.styles.visible : this.styles.hidden]}>
+							<TouchableOpacity
+								activeOpacity={0.5}
+								style={this.styles.backButton}
+								onPress={() => this.setState({customizePage: 'equipment', modifyingTrait: -1, newTrait: {}})}>
+								<Text style={this.styles.modalSettingButton}>Back</Text>
+							</TouchableOpacity>
+							<View style={this.styles.customizeSettingContainer}>
+								<Text style={this.styles.modalSettingLabel}>Name</Text>
+								<TextInput
+									style={this.styles.customizeTextInput}
+									value={this.state.newTrait.Name}
+									onChangeText={(value) => this.setSetting('Name', value, 'newTrait')}
+									multiline={false}
+									underlineColorAndroid='transparent'
+								/>
+							</View>
+							<View style={this.styles.customizeSettingContainer}>
+								<Text style={this.styles.modalSettingLabel}>Description</Text>
+								<TextInput
+									style={this.styles.customizeTextInput}
+									value={this.state.newTrait.description}
+									onChangeText={(value) => this.setSetting('description', value, 'newTrait')}
+									multiline={false}
+									underlineColorAndroid='transparent'
+								/>
+							</View>
+							<View style={this.styles.modalSettingContainer}>
+								<Text style={this.styles.modalSettingLabel}>Min Lvl</Text>
+								<Picker
+									selectedValue={this.state.newTrait.levelReq}
+									style={this.styles.modalSettingPickerThin}
+									onValueChange={(itemValue, itemIndex) => this.setSetting("levelReq", itemValue, 'newTrait')}
+									mode="dropdown" >
+									<Picker.Item label="0" value={0} />
+									<Picker.Item label="1" value={1} />
+									<Picker.Item label="2" value={2} />
+									<Picker.Item label="3" value={3} />
+									<Picker.Item label="4" value={4} />
+								</Picker>
+							</View>
+							{/* Read README.txt to modify MultiSelect if you just installed node_modules */}
 							<MultiSelect
 								hideTags
-								items={this.state.customTraits.races.concat(require('./src/Race.js').placeholder)}
-								uniqueKey="Name"
-								onSelectedItemsChange={ selectedItems => this.setState({ newTrait: {...this.state.newTrait, raceReq: selectedItems} }) }
-								selectedItems={this.state.newTrait.raceReq}
-								selectText="Race Specific"
+								items={this.getAllClasses().map(clas => { return {Name: clas.Name, id: clas.Properties[0]}})}
+								uniqueKey="id"
+								onSelectedItemsChange={ selectedItems => this.setState({ newTrait: {...this.state.newTrait, classReq: selectedItems} }) }
+								selectedItems={this.state.newTrait.classReq}
+								selectText="Class Specific"
 								displayKey="Name"
 								submitButtonText="Done"
-								styleMainWrapper={this.styles.multiSelect}
 								styleDropdownMenuSubsection = {this.styles.multiSelectBackground}
 								styleTextDropdown={this.styles.multiSelectText}
 								styleTextDropdownSelected={this.styles.multiSelectTextSmall}
@@ -761,36 +860,6 @@ export default class App extends React.Component {
 			return nameArr[0].trim().split(' ')[0].trim().slice(0, 10);
 		}
 	};
-
-	editTrait (item, index) {
-		// remember index so we can update it
-		this.setState({modifyingTrait: index})
-		// convert generator-usable trait into editable trait
-		if (this.state.customizePage === 'personalities') {
-			this.setState({
-				newTrait: {
-					Name: item.Name
-				},
-				customizePage: "editPersonality"
-			})
-		}
-		if (this.state.customizePage === 'appearences') {
-			this.setState({
-				newTrait: {
-					Name: item.Name
-				},
-				customizePage: "editAppearence"
-			})
-		}
-		if (this.state.customizePage === 'accents') {
-			this.setState({
-				newTrait: {
-					Name: item
-				},
-				customizePage: "editAccent"
-			})
-		}
-	}
 	
 	
 	//helper function to underline "New" in modal
@@ -884,6 +953,7 @@ export default class App extends React.Component {
 		this.showCustomize = this.showCustomize.bind(this);
 		this.saveTrait = this.saveTrait.bind(this);
 		this.deleteTrait = this.deleteTrait.bind(this);
+		this.getAllClasses = this.getAllClasses.bind(this);
 	
 		AsyncStorage.getItem("characters", (error, result) => {
 			if(result && !error) this.setState({characters: JSON.parse(result), showText: true});
@@ -1105,8 +1175,8 @@ export default class App extends React.Component {
 			this.state.customTraits.personalities.unshift({
 				Reroll: 0,
 				Description: this.state.newTrait.Name,
-				Properties: [],
-				Incompatible: [],
+				Properties: [id+""],
+				Incompatible: [id+""],
 				Name: this.state.newTrait.Name,
 				id,
 			})
@@ -1129,8 +1199,8 @@ export default class App extends React.Component {
 			this.state.customTraits.appearences.unshift({
 				Reroll: 0,
 				Description: this.state.newTrait.Name,
-				Properties: [],
-				Incompatible: [],
+				Properties: [id+""],
+				Incompatible: [id+""],
 				Name: this.state.newTrait.Name,
 				id,
 			})
@@ -1153,6 +1223,66 @@ export default class App extends React.Component {
 			//go back in modal
 			this.setState({customizePage: "accents", newTrait: {}, modifyingTrait: -1, customTraits: traitsClone})
 		}
+		if (this.state.customizePage === "editAbility") {
+			//validate
+			if (!this.state.newTrait.Name) return
+			//this means we're editing a trait, remove the old one
+			if (this.state.modifyingTrait > -1) {
+				// preserve the id
+				id = this.state.customTraits.abilities[this.state.modifyingTrait].id
+				this.state.customTraits.abilities.splice(this.state.modifyingTrait, 1)
+			}
+			let description = this.state.newTrait.Name + (this.state.newTrait.description ? ": " + this.state.newTrait.description : "")
+			let requirements = {
+				Level: this.state.newTrait.levelReq,
+				Properties: this.state.newTrait.classReq,
+			}
+			//add the new trait/version
+			this.state.customTraits.abilities.unshift({
+				Reroll: 0,
+				Description: description,
+				Properties: [id+""],
+				Incompatible: [id+""],
+				Name: this.state.newTrait.Name,
+				Requirements: requirements,
+				id,
+			})
+			let traitsClone = {
+				...this.state.customTraits
+			}
+			//go back in modal
+			this.setState({customizePage: "abilities", newTrait: {}, modifyingTrait: -1, customTraits: traitsClone})
+		}
+		if (this.state.customizePage === "editEquipment") {
+			//validate
+			if (!this.state.newTrait.Name) return
+			//this means we're editing a trait, remove the old one
+			if (this.state.modifyingTrait > -1) {
+				// preserve the id
+				id = this.state.customTraits.equipment[this.state.modifyingTrait].id
+				this.state.customTraits.equipment.splice(this.state.modifyingTrait, 1)
+			}
+			let description = this.state.newTrait.Name + (this.state.newTrait.description ? ": " + this.state.newTrait.description : "")
+			let requirements = {
+				Level: this.state.newTrait.levelReq,
+				Properties: this.state.newTrait.classReq,
+			}
+			//add the new trait/version
+			// for some reason equipment does incompatible differently
+			this.state.customTraits.equipment.unshift({
+				Reroll: 0,
+				Description: description,
+				Incompatible: description,
+				Name: this.state.newTrait.Name,
+				Requirements: requirements,
+				id,
+			})
+			let traitsClone = {
+				...this.state.customTraits
+			}
+			//go back in modal
+			this.setState({customizePage: "equipment", newTrait: {}, modifyingTrait: -1, customTraits: traitsClone})
+		}
 	}
 
 	deleteTrait () {
@@ -1169,11 +1299,85 @@ export default class App extends React.Component {
 			this.state.customTraits.appearences.splice(this.state.modifyingTrait, 1)
 			page = "appearences"
 		}
+		if (this.state.customizePage === "editAbility") {
+			this.state.customTraits.abilities.splice(this.state.modifyingTrait, 1)
+			page = "abilities"
+		}
+		if (this.state.customizePage === "editEquipment") {
+			this.state.customTraits.equipment.splice(this.state.modifyingTrait, 1)
+			page = "equipment"
+		}
 		let traitsClone = {
 			...this.state.customTraits
 		}
 		//go back in modal
 		this.setState({customizePage: page, newTrait: {}, modifyingTrait: -1, customTraits: traitsClone})
+	}
+
+	editTrait (item, index) {
+		// remember index so we can update it
+		this.setState({modifyingTrait: index})
+		// convert generator-usable trait into editable trait
+		if (this.state.customizePage === 'personalities') {
+			this.setState({
+				newTrait: {
+					Name: item.Name
+				},
+				customizePage: "editPersonality"
+			})
+		}
+		if (this.state.customizePage === 'appearences') {
+			this.setState({
+				newTrait: {
+					Name: item.Name
+				},
+				customizePage: "editAppearence"
+			})
+		}
+		if (this.state.customizePage === 'accents') {
+			this.setState({
+				newTrait: {
+					Name: item
+				},
+				customizePage: "editAccent"
+			})
+		}
+		if (this.state.customizePage === 'abilities') {
+			let desc = ""
+			if (item.Description.length > item.Name.length) {
+				desc = item.Description.substr(item.Name.length + 2)
+			}
+			this.setState({
+				newTrait: {
+					Name: item.Name,
+					description: desc,
+					classReq: item.Requirements.Properties,
+					levelReq: item.Requirements.Level
+				},
+				customizePage: "editAbility"
+			})
+		}
+		if (this.state.customizePage === 'equipment') {
+			let desc = ""
+			if (item.Description.length > item.Name.length) {
+				desc = item.Description.substr(item.Name.length + 2)
+			}
+			this.setState({
+				newTrait: {
+					Name: item.Name,
+					description: desc,
+					classReq: item.Requirements.Properties,
+					levelReq: item.Requirements.Level
+				},
+				customizePage: "editEquipment"
+			})
+		}
+	}
+
+	getAllClasses () {
+		let classes = this.state.customTraits.classes.concat(require('./src/Class.js').placeholder)
+		classes = classes.filter(x => x.Name !== "None")
+		return classes
 	}
 	
 	
@@ -1463,10 +1667,6 @@ export default class App extends React.Component {
 			opacity: 1
 		},
 
-		multiSelect: {
-			marginTop: 15,
-		},
-
 		multiSelectBackground: {
 			backgroundColor: 'transparent'
 		},
@@ -1480,6 +1680,10 @@ export default class App extends React.Component {
 			color: '#ffffff',
 			fontSize: 14,
 		},
+
+		multiSelectSearch: {
+			display: 'none'
+		}
 	});
 	
   
