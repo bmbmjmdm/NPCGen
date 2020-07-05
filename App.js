@@ -197,7 +197,8 @@ export default class App extends React.Component {
 						imageStyle={this.styles.modalImage}
 						style={this.styles.modalContent}>
 						
-						<ScrollView style={[this.styles.modalScroll, this.state.customizePage == 'default' ? this.styles.visible : this.styles.hidden]}>
+						{this.state.customizePage == 'default' &&
+						<ScrollView style={this.styles.modalScroll}>
 							<TouchableOpacity
 								activeOpacity={0.5}
 								onPress={() => this.setState({customizePage: 'personalities'})}>
@@ -269,8 +270,10 @@ export default class App extends React.Component {
 								</ImageBackground>
 							</TouchableOpacity>
 						</ScrollView>
+						}
 
-						<View style={[this.styles.modalScroll, this.state.customizePage == 'personalities' ? this.styles.visible : this.styles.hidden]}>
+						{this.state.customizePage == 'personalities' && 
+						<View style={this.styles.modalScroll}>
 							<TouchableOpacity
 								activeOpacity={0.5}
 								style={this.styles.backButton}
@@ -279,7 +282,7 @@ export default class App extends React.Component {
 							</TouchableOpacity>
 							<TouchableOpacity
 								activeOpacity={0.5}
-								onPress={() => this.setState({customizePage: 'editPersonality', newTrait: {Name: ""}, modifyingTrait: -1})}>
+								onPress={() => this.setState({customizePage: 'editPersonality', validate: false, newTrait: {Name: ""}, modifyingTrait: -1})}>
 								<ImageBackground
 									source={require('./src/eye_red.png')}
 									imageStyle={this.styles.modalImage}
@@ -295,8 +298,10 @@ export default class App extends React.Component {
 								extraData={this.state.customTraits}
 							/>
 						</View>
+						}
 
-						<ScrollView style={[this.styles.modalScroll, this.state.customizePage == 'editPersonality' ? this.styles.visible : this.styles.hidden]}>
+						{this.state.customizePage == 'editPersonality' &&
+						<ScrollView style={this.styles.modalScroll}>
 							<TouchableOpacity
 								activeOpacity={0.5}
 								style={this.styles.backButton}
@@ -306,7 +311,7 @@ export default class App extends React.Component {
 							<View style={this.styles.customizeSettingContainer}>
 								<Text style={this.styles.modalSettingLabel}>Name</Text>
 								<TextInput
-									style={this.styles.customizeTextInput}
+									style={[this.styles.customizeTextInput, this.state.validate && !this.state.newTrait.Name ? this.styles.redOutline : {}]}
 									value={this.state.newTrait.Name}
 									onChangeText={(value) => this.setSetting('Name', value, 'newTrait')}
 									multiline={false}
@@ -328,8 +333,10 @@ export default class App extends React.Component {
 								</TouchableOpacity>
 							</View>
 						</ScrollView>
+						}
 
-						<View style={[this.styles.modalScroll, this.state.customizePage == 'appearences' ? this.styles.visible : this.styles.hidden]}>
+						{this.state.customizePage == 'appearences' && 
+						<View style={this.styles.modalScroll}>
 							<TouchableOpacity
 								activeOpacity={0.5}
 								style={this.styles.backButton}
@@ -338,7 +345,7 @@ export default class App extends React.Component {
 							</TouchableOpacity>
 							<TouchableOpacity
 								activeOpacity={0.5}
-								onPress={() => this.setState({customizePage: 'editAppearence', newTrait: {Name: ""}, modifyingTrait: -1})}>
+								onPress={() => this.setState({customizePage: 'editAppearence', validate: false, newTrait: {Name: ""}, modifyingTrait: -1})}>
 								<ImageBackground
 									source={require('./src/eye_red.png')}
 									imageStyle={this.styles.modalImage}
@@ -354,8 +361,11 @@ export default class App extends React.Component {
 								extraData={this.state.customTraits}
 							/>
 						</View>
+						}
 
-						<ScrollView style={[this.styles.modalScroll, this.state.customizePage == 'editAppearence' ? this.styles.visible : this.styles.hidden]}>
+
+						{this.state.customizePage == 'editAppearence' &&
+						<ScrollView style={this.styles.modalScroll}>
 							<TouchableOpacity
 								activeOpacity={0.5}
 								style={this.styles.backButton}
@@ -365,7 +375,7 @@ export default class App extends React.Component {
 							<View style={this.styles.customizeSettingContainer}>
 								<Text style={this.styles.modalSettingLabel}>Name</Text>
 								<TextInput
-									style={this.styles.customizeTextInput}
+									style={[this.styles.customizeTextInput, this.state.validate && !this.state.newTrait.Name ? this.styles.redOutline : {}]}
 									value={this.state.newTrait.Name}
 									onChangeText={(value) => this.setSetting('Name', value, 'newTrait')}
 									multiline={false}
@@ -387,9 +397,10 @@ export default class App extends React.Component {
 								</TouchableOpacity>
 							</View>
 						</ScrollView>
+						}
 						
-
-						<View style={[this.styles.modalScroll, this.state.customizePage == 'accents' ? this.styles.visible : this.styles.hidden]}>
+						{this.state.customizePage == 'accents' &&
+						<View style={this.styles.modalScroll}>
 							<TouchableOpacity
 								activeOpacity={0.5}
 								style={this.styles.backButton}
@@ -398,7 +409,7 @@ export default class App extends React.Component {
 							</TouchableOpacity>
 							<TouchableOpacity
 								activeOpacity={0.5}
-								onPress={() => this.setState({customizePage: 'editAccent', newTrait: {Name: ""}, modifyingTrait: -1})}>
+								onPress={() => this.setState({customizePage: 'editAccent', validate: false, newTrait: {Name: ""}, modifyingTrait: -1})}>
 								<ImageBackground
 									source={require('./src/eye_red.png')}
 									imageStyle={this.styles.modalImage}
@@ -414,8 +425,10 @@ export default class App extends React.Component {
 								extraData={this.state.customTraits}
 							/>
 						</View>
+						}
 
-						<ScrollView style={[this.styles.modalScroll, this.state.customizePage == 'editAccent' ? this.styles.visible : this.styles.hidden]}>
+						{this.state.customizePage == 'editAccent' &&
+						<ScrollView style={this.styles.modalScroll}>
 							<TouchableOpacity
 								activeOpacity={0.5}
 								style={this.styles.backButton}
@@ -425,7 +438,7 @@ export default class App extends React.Component {
 							<View style={this.styles.customizeSettingContainer}>
 								<Text style={this.styles.modalSettingLabel}>Name</Text>
 								<TextInput
-									style={this.styles.customizeTextInput}
+									style={[this.styles.customizeTextInput, this.state.validate && !this.state.newTrait.Name ? this.styles.redOutline : {}]}
 									value={this.state.newTrait.Name}
 									onChangeText={(value) => this.setSetting('Name', value, 'newTrait')}
 									multiline={false}
@@ -447,9 +460,10 @@ export default class App extends React.Component {
 								</TouchableOpacity>
 							</View>
 						</ScrollView>
+						}
 						
-
-						<View style={[this.styles.modalScroll, this.state.customizePage == 'accents' ? this.styles.visible : this.styles.hidden]}>
+						{this.state.customizePage == 'abilities' &&
+						<View style={this.styles.modalScroll}>
 							<TouchableOpacity
 								activeOpacity={0.5}
 								style={this.styles.backButton}
@@ -458,67 +472,7 @@ export default class App extends React.Component {
 							</TouchableOpacity>
 							<TouchableOpacity
 								activeOpacity={0.5}
-								onPress={() => this.setState({customizePage: 'editAccent', newTrait: {Name: ""}, modifyingTrait: -1})}>
-								<ImageBackground
-									source={require('./src/eye_red.png')}
-									imageStyle={this.styles.modalImage}
-									style={this.styles.eyeButton}>
-										<Text style={this.styles.modalSettingLabel}>New</Text>
-								</ImageBackground>
-							</TouchableOpacity>
-							<FlatList
-								data={this.state.customTraits.accents}
-								keyExtractor={this._keyCustomTraits}
-								renderItem={this._renderCustomTraits}
-								style={this.styles.existingTraits}
-								extraData={this.state.customTraits}
-							/>
-						</View>
-
-						<ScrollView style={[this.styles.modalScroll, this.state.customizePage == 'editAccent' ? this.styles.visible : this.styles.hidden]}>
-							<TouchableOpacity
-								activeOpacity={0.5}
-								style={this.styles.backButton}
-								onPress={() => this.setState({customizePage: 'accents', modifyingTrait: -1, newTrait: {}})}>
-								<Text style={this.styles.modalSettingButton}>Back</Text>
-							</TouchableOpacity>							
-							<View style={this.styles.customizeSettingContainer}>
-								<Text style={this.styles.modalSettingLabel}>Name</Text>
-								<TextInput
-									style={this.styles.customizeTextInput}
-									value={this.state.newTrait.Name}
-									onChangeText={(value) => this.setSetting('Name', value, 'newTrait')}
-									multiline={false}
-									underlineColorAndroid='transparent'
-								/>
-							</View>
-							<View style={this.styles.modalSettingContainer}>
-								<TouchableOpacity
-									activeOpacity={0.5}
-									style={this.styles.saveButton}
-									onPress={this.saveTrait}>
-									<Text style={this.styles.modalSettingButton}>Save</Text>
-								</TouchableOpacity>
-								<TouchableOpacity
-									activeOpacity={0.5}
-									style={[this.styles.deleteButton, this.state.modifyingTrait > -1 ? this.styles.visible : this.styles.hidden]}
-									onPress={this.deleteTrait}>
-									<Text style={this.styles.modalSettingButtonRed}>Delete</Text>
-								</TouchableOpacity>
-							</View>
-						</ScrollView>
-						
-
-						<View style={[this.styles.modalScroll, this.state.customizePage == 'abilities' ? this.styles.visible : this.styles.hidden]}>
-							<TouchableOpacity
-								activeOpacity={0.5}
-								style={this.styles.backButton}
-								onPress={() => this.setState({customizePage: 'default'})}>
-								<Text style={this.styles.modalSettingButton}>Back</Text>
-							</TouchableOpacity>
-							<TouchableOpacity
-								activeOpacity={0.5}
-								onPress={() => this.setState({customizePage: 'editAbility', newTrait: {Name: "", description: "", classReq: [], levelReq: 0}, modifyingTrait: -1})}>
+								onPress={() => this.setState({customizePage: 'editAbility', validate: false, newTrait: {Name: "", description: "", classReq: [], levelReq: 0}, modifyingTrait: -1})}>
 								<ImageBackground
 									source={require('./src/eye_red.png')}
 									imageStyle={this.styles.modalImage}
@@ -534,8 +488,10 @@ export default class App extends React.Component {
 								extraData={this.state.customTraits}
 							/>
 						</View>
+						}
 
-						<ScrollView style={[this.styles.modalScroll, this.state.customizePage == 'editAbility' ? this.styles.visible : this.styles.hidden]}>
+						{this.state.customizePage == 'editAbility' &&
+						<ScrollView style={this.styles.modalScroll}>
 							<TouchableOpacity
 								activeOpacity={0.5}
 								style={this.styles.backButton}
@@ -545,7 +501,7 @@ export default class App extends React.Component {
 							<View style={this.styles.customizeSettingContainer}>
 								<Text style={this.styles.modalSettingLabel}>Name</Text>
 								<TextInput
-									style={this.styles.customizeTextInput}
+									style={[this.styles.customizeTextInput, this.state.validate && !this.state.newTrait.Name ? this.styles.redOutline : {}]}
 									value={this.state.newTrait.Name}
 									onChangeText={(value) => this.setSetting('Name', value, 'newTrait')}
 									multiline={false}
@@ -606,9 +562,11 @@ export default class App extends React.Component {
 								</TouchableOpacity>
 							</View>
 						</ScrollView>
+						}
 						
-
-						<View style={[this.styles.modalScroll, this.state.customizePage == 'equipment' ? this.styles.visible : this.styles.hidden]}>
+						
+						{this.state.customizePage == 'equipment' &&
+						<View style={this.styles.modalScroll}>
 							<TouchableOpacity
 								activeOpacity={0.5}
 								style={this.styles.backButton}
@@ -617,7 +575,7 @@ export default class App extends React.Component {
 							</TouchableOpacity>
 							<TouchableOpacity
 								activeOpacity={0.5}
-								onPress={() => this.setState({customizePage: 'editEquipment', newTrait: {Name: "", description: "", classReq: [], levelReq: 0}, modifyingTrait: -1})}>
+								onPress={() => this.setState({customizePage: 'editEquipment', validate: false, newTrait: {Name: "", description: "", classReq: [], levelReq: 0}, modifyingTrait: -1})}>
 								<ImageBackground
 									source={require('./src/eye_red.png')}
 									imageStyle={this.styles.modalImage}
@@ -633,8 +591,10 @@ export default class App extends React.Component {
 								extraData={this.state.customTraits}
 							/>
 						</View>
+						}
 
-						<ScrollView style={[this.styles.modalScroll, this.state.customizePage == 'editEquipment' ? this.styles.visible : this.styles.hidden]}>
+						{this.state.customizePage == 'editEquipment' &&
+						<ScrollView style={this.styles.modalScroll}>
 							<TouchableOpacity
 								activeOpacity={0.5}
 								style={this.styles.backButton}
@@ -644,7 +604,7 @@ export default class App extends React.Component {
 							<View style={this.styles.customizeSettingContainer}>
 								<Text style={this.styles.modalSettingLabel}>Name</Text>
 								<TextInput
-									style={this.styles.customizeTextInput}
+									style={[this.styles.customizeTextInput, this.state.validate && !this.state.newTrait.Name ? this.styles.redOutline : {}]}
 									value={this.state.newTrait.Name}
 									onChangeText={(value) => this.setSetting('Name', value, 'newTrait')}
 									multiline={false}
@@ -704,9 +664,11 @@ export default class App extends React.Component {
 								</TouchableOpacity>
 							</View>
 						</ScrollView>
+						}
 
 						
-						<View style={[this.styles.modalScroll, this.state.customizePage == 'races' ? this.styles.visible : this.styles.hidden]}>
+						{this.state.customizePage == 'races' &&
+						<View style={this.styles.modalScroll}>
 							<TouchableOpacity
 								activeOpacity={0.5}
 								style={this.styles.backButton}
@@ -715,7 +677,7 @@ export default class App extends React.Component {
 							</TouchableOpacity>
 							<TouchableOpacity
 								activeOpacity={0.5}
-								onPress={() => this.setState({customizePage: 'editRace', newTrait: {Name: "", ability: "", primaryStat: "", secondaryStat: ""}, modifyingTrait: -1})}>
+								onPress={() => this.setState({customizePage: 'editRace', validate: false, newTrait: {Name: "", ability: "", primaryStat: "", secondaryStat: ""}, modifyingTrait: -1})}>
 								<ImageBackground
 									source={require('./src/eye_red.png')}
 									imageStyle={this.styles.modalImage}
@@ -731,8 +693,10 @@ export default class App extends React.Component {
 								extraData={this.state.customTraits}
 							/>
 						</View>
+						}
 
-						<ScrollView style={[this.styles.modalScroll, this.state.customizePage == 'editRace' ? this.styles.visible : this.styles.hidden]}>
+						{this.state.customizePage == 'editRace' &&
+						<ScrollView style={this.styles.modalScroll}>
 							<TouchableOpacity
 								activeOpacity={0.5}
 								style={this.styles.backButton}
@@ -742,7 +706,7 @@ export default class App extends React.Component {
 							<View style={this.styles.customizeSettingContainer}>
 								<Text style={this.styles.modalSettingLabel}>Name</Text>
 								<TextInput
-									style={this.styles.customizeTextInput}
+									style={[this.styles.customizeTextInput, this.state.validate && !this.state.newTrait.Name ? this.styles.redOutline : {}]}
 									value={this.state.newTrait.Name}
 									onChangeText={(value) => this.setSetting('Name', value, 'newTrait')}
 									multiline={false}
@@ -763,35 +727,39 @@ export default class App extends React.Component {
 							</View>
 							<View style={this.styles.modalSettingContainer}>
 								<Text style={this.styles.modalSettingLabel}>Stat +2</Text>
-								<Picker
-									selectedValue={this.state.newTrait.primaryStat}
-									style={this.styles.modalSettingPickerMed}
-									onValueChange={(itemValue, itemIndex) => this.setSetting("primaryStat", itemValue, 'newTrait')}
-									mode="dropdown" >
-									<Picker.Item label="Pick" value="" />
-									<Picker.Item label="STR" value="S" />
-									<Picker.Item label="CON" value="E" />
-									<Picker.Item label="DEX" value="D" />
-									<Picker.Item label="WIS" value="W" />
-									<Picker.Item label="INT" value="I" />
-									<Picker.Item label="CHA" value="C" />
-								</Picker>
+								<View style={this.state.validate && !this.state.newTrait.primaryStat ? this.styles.redOutline : this.styles.transOutline}>
+									<Picker
+										selectedValue={this.state.newTrait.primaryStat}
+										style={this.styles.modalSettingPickerMed}
+										onValueChange={(itemValue, itemIndex) => this.setSetting("primaryStat", itemValue, 'newTrait')}
+										mode="dropdown" >
+										<Picker.Item label="Pick" value="" />
+										<Picker.Item label="STR" value="S" />
+										<Picker.Item label="CON" value="E" />
+										<Picker.Item label="DEX" value="D" />
+										<Picker.Item label="WIS" value="W" />
+										<Picker.Item label="INT" value="I" />
+										<Picker.Item label="CHA" value="C" />
+									</Picker>
+								</View>
 							</View>
 							<View style={this.styles.modalSettingContainer}>
 								<Text style={this.styles.modalSettingLabel}>Stat +1</Text>
-								<Picker
-									selectedValue={this.state.newTrait.secondaryStat}
-									style={this.styles.modalSettingPickerMed}
-									onValueChange={(itemValue, itemIndex) => this.setSetting("secondaryStat", itemValue, 'newTrait')}
-									mode="dropdown" >
-									<Picker.Item label="Pick" value="" />
-									<Picker.Item label="STR" value="S" />
-									<Picker.Item label="CON" value="E" />
-									<Picker.Item label="DEX" value="D" />
-									<Picker.Item label="WIS" value="W" />
-									<Picker.Item label="INT" value="I" />
-									<Picker.Item label="CHA" value="C" />
-								</Picker>
+								<View style={this.state.validate && !this.state.newTrait.secondaryStat ? this.styles.redOutline : this.styles.transOutline}>
+									<Picker
+										selectedValue={this.state.newTrait.secondaryStat}
+										style={this.styles.modalSettingPickerMed}
+										onValueChange={(itemValue, itemIndex) => this.setSetting("secondaryStat", itemValue, 'newTrait')}
+										mode="dropdown" >
+										<Picker.Item label="Pick" value="" />
+										<Picker.Item label="STR" value="S" />
+										<Picker.Item label="CON" value="E" />
+										<Picker.Item label="DEX" value="D" />
+										<Picker.Item label="WIS" value="W" />
+										<Picker.Item label="INT" value="I" />
+										<Picker.Item label="CHA" value="C" />
+									</Picker>
+								</View>
 							</View>
 							<View style={this.styles.modalSettingContainer}>
 								<TouchableOpacity
@@ -808,9 +776,11 @@ export default class App extends React.Component {
 								</TouchableOpacity>
 							</View>
 						</ScrollView>
+						}
 
 						
-						<View style={[this.styles.modalScroll, this.state.customizePage == 'classes' ? this.styles.visible : this.styles.hidden]}>
+						{this.state.customizePage == 'classes' &&
+						<View style={this.styles.modalScroll}>
 							<TouchableOpacity
 								activeOpacity={0.5}
 								style={this.styles.backButton}
@@ -819,7 +789,7 @@ export default class App extends React.Component {
 							</TouchableOpacity>
 							<TouchableOpacity
 								activeOpacity={0.5}
-								onPress={() => this.setState({customizePage: 'editClass', newTrait: {Name: "", primaryStat: "", secondaryStat: "", ability: "", weapon: "", armor: "", base: ""}, modifyingTrait: -1})}>
+								onPress={() => this.setState({customizePage: 'editClass', validate: false, newTrait: {Name: "", primaryStat: "", secondaryStat: "", ability: "", weapon: "", armor: "", base: ""}, modifyingTrait: -1})}>
 								<ImageBackground
 									source={require('./src/eye_red.png')}
 									imageStyle={this.styles.modalImage}
@@ -835,8 +805,10 @@ export default class App extends React.Component {
 								extraData={this.state.customTraits}
 							/>
 						</View>
+						}
 
-						<ScrollView style={[this.styles.modalScroll, this.state.customizePage == 'editClass' ? this.styles.visible : this.styles.hidden]}>
+						{this.state.customizePage == 'editClass' &&
+						<ScrollView style={this.styles.modalScroll}>
 							<TouchableOpacity
 								activeOpacity={0.5}
 								style={this.styles.backButton}
@@ -846,7 +818,7 @@ export default class App extends React.Component {
 							<View style={this.styles.customizeSettingContainer}>
 								<Text style={this.styles.modalSettingLabel}>Name</Text>
 								<TextInput
-									style={this.styles.customizeTextInput}
+									style={[this.styles.customizeTextInput, this.state.validate && !this.state.newTrait.Name ? this.styles.redOutline : {}]}
 									value={this.state.newTrait.Name}
 									onChangeText={(value) => this.setSetting('Name', value, 'newTrait')}
 									multiline={false}
@@ -899,64 +871,72 @@ export default class App extends React.Component {
 							</View>
 							<View style={this.styles.modalSettingContainer}>
 								<Text style={this.styles.modalSettingLabel}>Main Stat</Text>
-								<Picker
-									selectedValue={this.state.newTrait.primaryStat}
-									style={this.styles.modalSettingPickerMed}
-									onValueChange={(itemValue, itemIndex) => this.setSetting("primaryStat", itemValue, 'newTrait')}
-									mode="dropdown" >
-									<Picker.Item label="Pick" value="" />
-									<Picker.Item label="STR" value="S" />
-									<Picker.Item label="CON" value="E" />
-									<Picker.Item label="DEX" value="D" />
-									<Picker.Item label="WIS" value="W" />
-									<Picker.Item label="INT" value="I" />
-									<Picker.Item label="CHA" value="C" />
-								</Picker>
+								<View style={this.state.validate && !this.state.newTrait.primaryStat ? this.styles.redOutline : this.styles.transOutline}>
+									<Picker
+										selectedValue={this.state.newTrait.primaryStat}
+										style={this.styles.modalSettingPickerMed}
+										onValueChange={(itemValue, itemIndex) => this.setSetting("primaryStat", itemValue, 'newTrait')}
+										mode="dropdown" >
+										<Picker.Item label="Pick" value="" />
+										<Picker.Item label="STR" value="S" />
+										<Picker.Item label="CON" value="E" />
+										<Picker.Item label="DEX" value="D" />
+										<Picker.Item label="WIS" value="W" />
+										<Picker.Item label="INT" value="I" />
+										<Picker.Item label="CHA" value="C" />
+									</Picker>
+								</View>
 							</View>
 							<View style={this.styles.modalSettingContainer}>
 								<Text style={this.styles.modalSettingLabel}>2nd Stat</Text>
-								<Picker
-									selectedValue={this.state.newTrait.secondaryStat}
-									style={this.styles.modalSettingPickerMed}
-									onValueChange={(itemValue, itemIndex) => this.setSetting("secondaryStat", itemValue, 'newTrait')}
-									mode="dropdown" >
-									<Picker.Item label="Pick" value="" />
-									<Picker.Item label="STR" value="S" />
-									<Picker.Item label="CON" value="E" />
-									<Picker.Item label="DEX" value="D" />
-									<Picker.Item label="WIS" value="W" />
-									<Picker.Item label="INT" value="I" />
-									<Picker.Item label="CHA" value="C" />
-								</Picker>
+								<View style={this.state.validate && !this.state.newTrait.secondaryStat ? this.styles.redOutline : this.styles.transOutline}>
+									<Picker
+										selectedValue={this.state.newTrait.secondaryStat}
+										style={this.styles.modalSettingPickerMed}
+										onValueChange={(itemValue, itemIndex) => this.setSetting("secondaryStat", itemValue, 'newTrait')}
+										mode="dropdown" >
+										<Picker.Item label="Pick" value="" />
+										<Picker.Item label="STR" value="S" />
+										<Picker.Item label="CON" value="E" />
+										<Picker.Item label="DEX" value="D" />
+										<Picker.Item label="WIS" value="W" />
+										<Picker.Item label="INT" value="I" />
+										<Picker.Item label="CHA" value="C" />
+									</Picker>
+								</View>
 							</View>
 							<View style={this.styles.modalSettingContainer}>
 								<Text style={this.styles.modalSettingLabel}>Weapon</Text>
-								<Picker
-									selectedValue={this.state.newTrait.weapon}
-									style={this.styles.modalSettingPickerMed}
-									onValueChange={(itemValue, itemIndex) => this.setSetting("weapon", itemValue, 'newTrait')}
-									mode="dropdown" >
-									<Picker.Item label="Pick" value="" />
-									<Picker.Item label="One-handed Melee" value="one-melee" />
-									<Picker.Item label="Two-handed Melee" value="two-melee" />
-									<Picker.Item label="Finesse Melee" value="finesse-melee" />
-									<Picker.Item label="Bows" value="bows" />
-									<Picker.Item label="Magic" value="magic" />
-								</Picker>
+								<View style={this.state.validate && !this.state.newTrait.weapon ? this.styles.redOutline : this.styles.transOutline}>
+									<Picker
+										selectedValue={this.state.newTrait.weapon}
+										style={this.styles.modalSettingPickerMed}
+										onValueChange={(itemValue, itemIndex) => this.setSetting("weapon", itemValue, 'newTrait')}
+										mode="dropdown" >
+										<Picker.Item label="Pick" value="" />
+										<Picker.Item label="One-handed Melee" value="one-melee" />
+										<Picker.Item label="Two-handed Melee" value="two-melee" />
+										<Picker.Item label="Finesse Melee" value="finesse-melee" />
+										<Picker.Item label="Bows" value="bows" />
+										<Picker.Item label="Magic" value="magic" />
+									</Picker>
+								</View>
 							</View>
 							<View style={this.styles.modalSettingContainer}>
 								<Text style={this.styles.modalSettingLabel}>Armor</Text>
-								<Picker
-									selectedValue={this.state.newTrait.armor}
-									style={this.styles.modalSettingPickerMed}
-									onValueChange={(itemValue, itemIndex) => this.setSetting("armor", itemValue, 'newTrait')}
-									mode="dropdown" >
-									<Picker.Item label="Pick" value="" />
-									<Picker.Item label="None" value="none" />
-									<Picker.Item label="Light" value="light" />
-									<Picker.Item label="Medium" value="medium" />
-									<Picker.Item label="Heavy" value="heavy" />
-								</Picker>
+								<View style={this.state.validate && !this.state.newTrait.armor ? this.styles.redOutline : this.styles.transOutline}>
+									<Picker
+										selectedValue={this.state.newTrait.armor}
+										style={this.styles.modalSettingPickerMed}
+										onValueChange={(itemValue, itemIndex) => this.setSetting("armor", itemValue, 'newTrait')}
+										mode="dropdown" >
+										<Picker.Item label="Pick" value="" />
+										<Picker.Item label="None" value="none" />
+										<Picker.Item label="Light" value="light" />
+										<Picker.Item label="Medium" value="medium" />
+										<Picker.Item label="Heavy" value="heavy" />
+									</Picker>
+								</View>
 							</View>
 							<View style={this.styles.modalSettingContainer}>
 								<TouchableOpacity
@@ -973,6 +953,7 @@ export default class App extends React.Component {
 								</TouchableOpacity>
 							</View>
 						</ScrollView>
+						}
 
 					</ImageBackground>
 				</Modal>
@@ -1186,6 +1167,7 @@ export default class App extends React.Component {
 			showText: false,
 			settingsVisible: false,
 			customizeVisible: false,
+			validate: false,
 			modifyingTrait: -1,
 			customizePage: 'default',
 			newTrait: {},
@@ -1439,7 +1421,10 @@ export default class App extends React.Component {
 		let id = uuid.v4()
 		if (this.state.customizePage === "editPersonality") {
 			//validate
-			if (!this.state.newTrait.Name) return
+			if (!this.state.newTrait.Name) {
+				this.setState({validate: true})
+				return
+			}
 			//this means we're editing a trait, remove the old one
 			if (this.state.modifyingTrait > -1) {
 				// preserve the id
@@ -1463,7 +1448,10 @@ export default class App extends React.Component {
 		}
 		if (this.state.customizePage === "editAppearence") {
 			//validate
-			if (!this.state.newTrait.Name) return
+			if (!this.state.newTrait.Name) {
+				this.setState({validate: true})
+				return
+			}
 			//this means we're editing a trait, remove the old one
 			if (this.state.modifyingTrait > -1) {
 				// preserve the id
@@ -1487,7 +1475,10 @@ export default class App extends React.Component {
 		}
 		if (this.state.customizePage === "editAccent") {
 			//validate
-			if (!this.state.newTrait.Name) return
+			if (!this.state.newTrait.Name) {
+				this.setState({validate: true})
+				return
+			}
 			//this means we're editing a trait, remove the old one
 			if (this.state.modifyingTrait > -1) this.state.customTraits.accents.splice(this.state.modifyingTrait, 1)
 			//add the new trait/version
@@ -1500,7 +1491,10 @@ export default class App extends React.Component {
 		}
 		if (this.state.customizePage === "editAbility") {
 			//validate
-			if (!this.state.newTrait.Name) return
+			if (!this.state.newTrait.Name) {
+				this.setState({validate: true})
+				return
+			}
 			//this means we're editing a trait, remove the old one
 			if (this.state.modifyingTrait > -1) {
 				// preserve the id
@@ -1530,7 +1524,10 @@ export default class App extends React.Component {
 		}
 		if (this.state.customizePage === "editEquipment") {
 			//validate
-			if (!this.state.newTrait.Name) return
+			if (!this.state.newTrait.Name) {
+				this.setState({validate: true})
+				return
+			}
 			//this means we're editing a trait, remove the old one
 			if (this.state.modifyingTrait > -1) {
 				// preserve the id
@@ -1560,9 +1557,10 @@ export default class App extends React.Component {
 		}
 		if (this.state.customizePage === "editRace") {
 			//validate
-			if (!this.state.newTrait.Name) return
-			if (!this.state.newTrait.primaryStat) return
-			if (!this.state.newTrait.secondaryStat) return
+			if (!this.state.newTrait.Name || !this.state.newTrait.primaryStat || !this.state.newTrait.secondaryStat) {
+				this.setState({validate: true})
+				return
+			}
 			//this means we're editing a trait, remove the old one
 			if (this.state.modifyingTrait > -1) {
 				// preserve the id
@@ -1596,11 +1594,11 @@ export default class App extends React.Component {
 		}
 		if (this.state.customizePage === "editClass") {
 			//validate
-			if (!this.state.newTrait.Name) return
-			if (!this.state.newTrait.primaryStat) return
-			if (!this.state.newTrait.secondaryStat) return
-			if (!this.state.newTrait.weapon) return
-			if (!this.state.newTrait.armor) return
+			if (!this.state.newTrait.Name || !this.state.newTrait.primaryStat || !this.state.newTrait.secondaryStat
+				|| !this.state.newTrait.weapon || !this.state.newTrait.armor) {
+				this.setState({validate: true})
+				return
+			}
 			//this means we're editing a trait, remove the old one
 			if (this.state.modifyingTrait > -1) {
 				// preserve the id
@@ -1741,6 +1739,7 @@ export default class App extends React.Component {
 		// convert generator-usable trait into editable trait
 		if (this.state.customizePage === 'personalities') {
 			this.setState({
+				validate: true,
 				newTrait: {
 					Name: item.Name
 				},
@@ -1749,6 +1748,7 @@ export default class App extends React.Component {
 		}
 		if (this.state.customizePage === 'appearences') {
 			this.setState({
+				validate: true,
 				newTrait: {
 					Name: item.Name
 				},
@@ -1757,6 +1757,7 @@ export default class App extends React.Component {
 		}
 		if (this.state.customizePage === 'accents') {
 			this.setState({
+				validate: true,
 				newTrait: {
 					Name: item
 				},
@@ -1769,6 +1770,7 @@ export default class App extends React.Component {
 				desc = item.Description.substr(item.Name.length + 2)
 			}
 			this.setState({
+				validate: true,
 				newTrait: {
 					Name: item.Name,
 					description: desc,
@@ -1784,6 +1786,7 @@ export default class App extends React.Component {
 				desc = item.Description.substr(item.Name.length + 2)
 			}
 			this.setState({
+				validate: true,
 				newTrait: {
 					Name: item.Name,
 					description: desc,
@@ -1795,6 +1798,7 @@ export default class App extends React.Component {
 		}
 		if (this.state.customizePage === 'races') {
 			this.setState({
+				validate: true,
 				newTrait: {
 					Name: item.Name,
 					ability: item.Abilities.join('\n'),
@@ -1806,6 +1810,7 @@ export default class App extends React.Component {
 		}
 		if (this.state.customizePage === 'classes') {
 			this.setState({
+				validate: true,
 				newTrait: {
 					Name: item.Name,
 					ability: item.AdditionalAbilities.join('\n'),
@@ -2160,7 +2165,16 @@ export default class App extends React.Component {
 
 		multiSelectSearch: {
 			display: 'none'
-		}
+		},
+
+		redOutline: {
+			borderWidth: 2,
+			borderColor: '#a21414',
+		},
+
+		transOutline: {
+			margin: 2,
+		},
 	});
 	
   
