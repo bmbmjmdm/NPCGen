@@ -68,21 +68,25 @@ export default class App extends React.Component {
 									style={this.styles.modalSettingPicker}
 									onValueChange={(itemValue, itemIndex) => this.setSetting("Class", itemValue, this.state.settingsPage)}
 									mode="dropdown" >
-									
 									<Picker.Item label="Any" value="Any" />
-									<Picker.Item label="Artificer" value="Artificer" />
-									<Picker.Item label="Barbarian" value="Barbarian" />
-									<Picker.Item label="Bard" value="Bard" />
-									<Picker.Item label="Cleric" value="Cleric" />
-									<Picker.Item label="Druid" value="Druid" />
-									<Picker.Item label="Fighter" value="Fighter" />
-									<Picker.Item label="Monk" value="Monk" />
-									<Picker.Item label="Paladin" value="Paladin" />
-									<Picker.Item label="Ranger" value="Ranger" />
-									<Picker.Item label="Rogue" value="Rogue" />
-									<Picker.Item label="Sorcerer" value="Sorcerer" />
-									<Picker.Item label="Warlock" value="Warlock" />
-									<Picker.Item label="Wizard" value="Wizard" />
+									{this.state.customTraits.classes.map(clas => {
+										return (
+											<Picker.Item label={clas.Name} value={clas.id} />
+										);
+									})}
+									<Picker.Item label="Artificer" value="artificer" />
+									<Picker.Item label="Barbarian" value="barbarian" />
+									<Picker.Item label="Bard" value="bard" />
+									<Picker.Item label="Cleric" value="cleric" />
+									<Picker.Item label="Druid" value="druid" />
+									<Picker.Item label="Fighter" value="fighter" />
+									<Picker.Item label="Monk" value="monk" />
+									<Picker.Item label="Paladin" value="paladin" />
+									<Picker.Item label="Ranger" value="ranger" />
+									<Picker.Item label="Rogue" value="rogue" />
+									<Picker.Item label="Sorcerer" value="sorcerer" />
+									<Picker.Item label="Warlock" value="warlock" />
+									<Picker.Item label="Wizard" value="wizard" />
 								</Picker>
 							</View>
 							
@@ -95,17 +99,22 @@ export default class App extends React.Component {
 									mode="dropdown" >
 									
 									<Picker.Item label="Any" value="Any" />
-									<Picker.Item label="Dragonborn" value="Dragonborn" />
-									<Picker.Item label="Dwarf" value="Dwarf" />
-									<Picker.Item label="Elf" value="Elf" />
-									<Picker.Item label="Gnome" value="Gnome" />
-									<Picker.Item label="Half-Elf" value="Half-Elf" />
-									<Picker.Item label="Halfling" value="Halfling" />
-									<Picker.Item label="Half-Orc" value="Half-Orc" />
-									<Picker.Item label="Human" value="Human" />
-									<Picker.Item label="Seafolk" value="Seafolk" />
-									<Picker.Item label="Tabaxi" value="Tabaxi" />
-									<Picker.Item label="Tiefling" value="Tiefling" />
+									{this.state.customTraits.races.map(race => {
+										return (
+											<Picker.Item label={race.Name} value={race.id} />
+										);
+									})}
+									<Picker.Item label="Dragonborn" value="dragonborn" />
+									<Picker.Item label="Dwarf" value="dwarf" />
+									<Picker.Item label="Elf" value="elf" />
+									<Picker.Item label="Gnome" value="gnome" />
+									<Picker.Item label="Half-Elf" value="half-elf" />
+									<Picker.Item label="Halfling" value="halfling" />
+									<Picker.Item label="Half-Orc" value="half-orc" />
+									<Picker.Item label="Human" value="human" />
+									<Picker.Item label="Seafolk" value="seafolk" />
+									<Picker.Item label="Tabaxi" value="tabaxi" />
+									<Picker.Item label="Tiefling" value="tiefling" />
 								</Picker>
 							</View>
 
@@ -123,7 +132,6 @@ export default class App extends React.Component {
 									style={this.styles.modalSettingPickerThin}
 									onValueChange={(itemValue, itemIndex) => this.setSetting("Equipment", itemValue, this.state.settingsPage)}
 									mode="dropdown" >
-									
 									<Picker.Item label="0" value={0} />
 									<Picker.Item label="1" value={1} />
 									<Picker.Item label="2" value={2} />
@@ -141,7 +149,6 @@ export default class App extends React.Component {
 									style={this.styles.modalSettingPickerThin}
 									onValueChange={(itemValue, itemIndex) => this.setSetting("Personality", itemValue, this.state.settingsPage)}
 									mode="dropdown" >
-									
 									<Picker.Item label="0" value={0} />
 									<Picker.Item label="1" value={1} />
 									<Picker.Item label="2" value={2} />
@@ -698,6 +705,275 @@ export default class App extends React.Component {
 							</View>
 						</ScrollView>
 
+						
+						<View style={[this.styles.modalScroll, this.state.customizePage == 'races' ? this.styles.visible : this.styles.hidden]}>
+							<TouchableOpacity
+								activeOpacity={0.5}
+								style={this.styles.backButton}
+								onPress={() => this.setState({customizePage: 'default'})}>
+								<Text style={this.styles.modalSettingButton}>Back</Text>
+							</TouchableOpacity>
+							<TouchableOpacity
+								activeOpacity={0.5}
+								onPress={() => this.setState({customizePage: 'editRace', newTrait: {Name: "", ability: "", primaryStat: "", secondaryStat: ""}, modifyingTrait: -1})}>
+								<ImageBackground
+									source={require('./src/eye_red.png')}
+									imageStyle={this.styles.modalImage}
+									style={this.styles.eyeButton}>
+										<Text style={this.styles.modalSettingLabel}>New</Text>
+								</ImageBackground>
+							</TouchableOpacity>
+							<FlatList
+								data={this.state.customTraits.races}
+								keyExtractor={this._keyCustomTraits}
+								renderItem={this._renderCustomTraits}
+								style={this.styles.existingTraits}
+								extraData={this.state.customTraits}
+							/>
+						</View>
+
+						<ScrollView style={[this.styles.modalScroll, this.state.customizePage == 'editRace' ? this.styles.visible : this.styles.hidden]}>
+							<TouchableOpacity
+								activeOpacity={0.5}
+								style={this.styles.backButton}
+								onPress={() => this.setState({customizePage: 'races', modifyingTrait: -1, newTrait: {}})}>
+								<Text style={this.styles.modalSettingButton}>Back</Text>
+							</TouchableOpacity>
+							<View style={this.styles.customizeSettingContainer}>
+								<Text style={this.styles.modalSettingLabel}>Name</Text>
+								<TextInput
+									style={this.styles.customizeTextInput}
+									value={this.state.newTrait.Name}
+									onChangeText={(value) => this.setSetting('Name', value, 'newTrait')}
+									multiline={false}
+									underlineColorAndroid='transparent'
+								/>
+							</View>
+							<View style={this.styles.customizeSettingContainer}>
+								<Text style={this.styles.modalSettingLabel}>Ability</Text>
+								<View style={this.styles.customizeTextInputLargeFrame}>
+									<TextInput
+										style={this.styles.customizeTextInputLarge}
+										value={this.state.newTrait.ability}
+										onChangeText={(value) => this.setSetting('ability', value, 'newTrait')}
+										multiline={true}
+										underlineColorAndroid='transparent'
+									/>
+								</View>
+							</View>
+							<View style={this.styles.modalSettingContainer}>
+								<Text style={this.styles.modalSettingLabel}>Stat +2</Text>
+								<Picker
+									selectedValue={this.state.newTrait.primaryStat}
+									style={this.styles.modalSettingPickerMed}
+									onValueChange={(itemValue, itemIndex) => this.setSetting("primaryStat", itemValue, 'newTrait')}
+									mode="dropdown" >
+									<Picker.Item label="Pick" value="" />
+									<Picker.Item label="STR" value="S" />
+									<Picker.Item label="CON" value="E" />
+									<Picker.Item label="DEX" value="D" />
+									<Picker.Item label="WIS" value="W" />
+									<Picker.Item label="INT" value="I" />
+									<Picker.Item label="CHA" value="C" />
+								</Picker>
+							</View>
+							<View style={this.styles.modalSettingContainer}>
+								<Text style={this.styles.modalSettingLabel}>Stat +1</Text>
+								<Picker
+									selectedValue={this.state.newTrait.secondaryStat}
+									style={this.styles.modalSettingPickerMed}
+									onValueChange={(itemValue, itemIndex) => this.setSetting("secondaryStat", itemValue, 'newTrait')}
+									mode="dropdown" >
+									<Picker.Item label="Pick" value="" />
+									<Picker.Item label="STR" value="S" />
+									<Picker.Item label="CON" value="E" />
+									<Picker.Item label="DEX" value="D" />
+									<Picker.Item label="WIS" value="W" />
+									<Picker.Item label="INT" value="I" />
+									<Picker.Item label="CHA" value="C" />
+								</Picker>
+							</View>
+							<View style={this.styles.modalSettingContainer}>
+								<TouchableOpacity
+									activeOpacity={0.5}
+									style={this.styles.saveButton}
+									onPress={this.saveTrait}>
+									<Text style={this.styles.modalSettingButton}>Save</Text>
+								</TouchableOpacity>
+								<TouchableOpacity
+									activeOpacity={0.5}
+									style={[this.styles.deleteButton, this.state.modifyingTrait > -1 ? this.styles.visible : this.styles.hidden]}
+									onPress={this.deleteTrait}>
+									<Text style={this.styles.modalSettingButtonRed}>Delete</Text>
+								</TouchableOpacity>
+							</View>
+						</ScrollView>
+
+						
+						<View style={[this.styles.modalScroll, this.state.customizePage == 'classes' ? this.styles.visible : this.styles.hidden]}>
+							<TouchableOpacity
+								activeOpacity={0.5}
+								style={this.styles.backButton}
+								onPress={() => this.setState({customizePage: 'default'})}>
+								<Text style={this.styles.modalSettingButton}>Back</Text>
+							</TouchableOpacity>
+							<TouchableOpacity
+								activeOpacity={0.5}
+								onPress={() => this.setState({customizePage: 'editClass', newTrait: {Name: "", primaryStat: "", secondaryStat: "", ability: "", weapon: "", armor: "", base: ""}, modifyingTrait: -1})}>
+								<ImageBackground
+									source={require('./src/eye_red.png')}
+									imageStyle={this.styles.modalImage}
+									style={this.styles.eyeButton}>
+										<Text style={this.styles.modalSettingLabel}>New</Text>
+								</ImageBackground>
+							</TouchableOpacity>
+							<FlatList
+								data={this.state.customTraits.classes}
+								keyExtractor={this._keyCustomTraits}
+								renderItem={this._renderCustomTraits}
+								style={this.styles.existingTraits}
+								extraData={this.state.customTraits}
+							/>
+						</View>
+
+						<ScrollView style={[this.styles.modalScroll, this.state.customizePage == 'editClass' ? this.styles.visible : this.styles.hidden]}>
+							<TouchableOpacity
+								activeOpacity={0.5}
+								style={this.styles.backButton}
+								onPress={() => this.setState({customizePage: 'classes', modifyingTrait: -1, newTrait: {}})}>
+								<Text style={this.styles.modalSettingButton}>Back</Text>
+							</TouchableOpacity>
+							<View style={this.styles.customizeSettingContainer}>
+								<Text style={this.styles.modalSettingLabel}>Name</Text>
+								<TextInput
+									style={this.styles.customizeTextInput}
+									value={this.state.newTrait.Name}
+									onChangeText={(value) => this.setSetting('Name', value, 'newTrait')}
+									multiline={false}
+									underlineColorAndroid='transparent'
+								/>
+							</View>
+							<View style={this.styles.customizeSettingContainer}>
+								<Text style={this.styles.modalSettingLabel}>Default Ability</Text>
+								<View style={this.styles.customizeTextInputLargeFrame}>
+									<TextInput
+										style={this.styles.customizeTextInputLarge}
+										value={this.state.newTrait.ability}
+										onChangeText={(value) => this.setSetting('ability', value, 'newTrait')}
+										multiline={true}
+										underlineColorAndroid='transparent'
+									/>
+								</View>
+							</View>
+							<View style={this.styles.modalSettingContainer}>
+								<Text style={this.styles.modalSettingLabel}>Base</Text>
+								<Picker
+									selectedValue={this.state.newTrait.base}
+									style={this.styles.modalSettingPicker}
+									onValueChange={(itemValue, itemIndex) => this.setSetting("base", itemValue, 'newTrait')}
+									mode="dropdown" >
+									<Picker.Item label="None" value="" />
+									{this.state.customTraits.classes.filter((clas, index) => 
+									{ 
+										return this.state.modifyingTrait == -1 || this.state.modifyingTrait != index 
+									})
+									.map((clas, index) => {
+										return (
+											<Picker.Item label={clas.Name} value={clas.id} />
+										);
+									})}
+									<Picker.Item label="Artificer" value="artificer" />
+									<Picker.Item label="Barbarian" value="barbarian" />
+									<Picker.Item label="Bard" value="bard" />
+									<Picker.Item label="Cleric" value="cleric" />
+									<Picker.Item label="Druid" value="druid" />
+									<Picker.Item label="Fighter" value="fighter" />
+									<Picker.Item label="Monk" value="monk" />
+									<Picker.Item label="Paladin" value="paladin" />
+									<Picker.Item label="Ranger" value="ranger" />
+									<Picker.Item label="Rogue" value="rogue" />
+									<Picker.Item label="Sorcerer" value="sorcerer" />
+									<Picker.Item label="Warlock" value="warlock" />
+									<Picker.Item label="Wizard" value="wizard" />
+								</Picker>
+							</View>
+							<View style={this.styles.modalSettingContainer}>
+								<Text style={this.styles.modalSettingLabel}>Main Stat</Text>
+								<Picker
+									selectedValue={this.state.newTrait.primaryStat}
+									style={this.styles.modalSettingPickerMed}
+									onValueChange={(itemValue, itemIndex) => this.setSetting("primaryStat", itemValue, 'newTrait')}
+									mode="dropdown" >
+									<Picker.Item label="Pick" value="" />
+									<Picker.Item label="STR" value="S" />
+									<Picker.Item label="CON" value="E" />
+									<Picker.Item label="DEX" value="D" />
+									<Picker.Item label="WIS" value="W" />
+									<Picker.Item label="INT" value="I" />
+									<Picker.Item label="CHA" value="C" />
+								</Picker>
+							</View>
+							<View style={this.styles.modalSettingContainer}>
+								<Text style={this.styles.modalSettingLabel}>2nd Stat</Text>
+								<Picker
+									selectedValue={this.state.newTrait.secondaryStat}
+									style={this.styles.modalSettingPickerMed}
+									onValueChange={(itemValue, itemIndex) => this.setSetting("secondaryStat", itemValue, 'newTrait')}
+									mode="dropdown" >
+									<Picker.Item label="Pick" value="" />
+									<Picker.Item label="STR" value="S" />
+									<Picker.Item label="CON" value="E" />
+									<Picker.Item label="DEX" value="D" />
+									<Picker.Item label="WIS" value="W" />
+									<Picker.Item label="INT" value="I" />
+									<Picker.Item label="CHA" value="C" />
+								</Picker>
+							</View>
+							<View style={this.styles.modalSettingContainer}>
+								<Text style={this.styles.modalSettingLabel}>Weapon</Text>
+								<Picker
+									selectedValue={this.state.newTrait.weapon}
+									style={this.styles.modalSettingPickerMed}
+									onValueChange={(itemValue, itemIndex) => this.setSetting("weapon", itemValue, 'newTrait')}
+									mode="dropdown" >
+									<Picker.Item label="Pick" value="" />
+									<Picker.Item label="One-handed Melee" value="one-melee" />
+									<Picker.Item label="Two-handed Melee" value="two-melee" />
+									<Picker.Item label="Finesse Melee" value="finesse-melee" />
+									<Picker.Item label="Bows" value="bows" />
+									<Picker.Item label="Magic" value="magic" />
+								</Picker>
+							</View>
+							<View style={this.styles.modalSettingContainer}>
+								<Text style={this.styles.modalSettingLabel}>Armor</Text>
+								<Picker
+									selectedValue={this.state.newTrait.armor}
+									style={this.styles.modalSettingPickerMed}
+									onValueChange={(itemValue, itemIndex) => this.setSetting("armor", itemValue, 'newTrait')}
+									mode="dropdown" >
+									<Picker.Item label="Pick" value="" />
+									<Picker.Item label="None" value="none" />
+									<Picker.Item label="Light" value="light" />
+									<Picker.Item label="Medium" value="medium" />
+									<Picker.Item label="Heavy" value="heavy" />
+								</Picker>
+							</View>
+							<View style={this.styles.modalSettingContainer}>
+								<TouchableOpacity
+									activeOpacity={0.5}
+									style={this.styles.saveButton}
+									onPress={this.saveTrait}>
+									<Text style={this.styles.modalSettingButton}>Save</Text>
+								</TouchableOpacity>
+								<TouchableOpacity
+									activeOpacity={0.5}
+									style={[this.styles.deleteButton, this.state.modifyingTrait > -1 ? this.styles.visible : this.styles.hidden]}
+									onPress={this.deleteTrait}>
+									<Text style={this.styles.modalSettingButtonRed}>Delete</Text>
+								</TouchableOpacity>
+							</View>
+						</ScrollView>
+
 					</ImageBackground>
 				</Modal>
 				
@@ -1106,7 +1382,6 @@ export default class App extends React.Component {
 	// displys the settings modal when the user clicks the gear icon
 	showCustomize(show) {
 		this.setState({customizeVisible: show});
-		this.setState({customizePage: 'default'});
 	}
 	
 	
@@ -1283,6 +1558,134 @@ export default class App extends React.Component {
 			//go back in modal
 			this.setState({customizePage: "equipment", newTrait: {}, modifyingTrait: -1, customTraits: traitsClone})
 		}
+		if (this.state.customizePage === "editRace") {
+			//validate
+			if (!this.state.newTrait.Name) return
+			if (!this.state.newTrait.primaryStat) return
+			if (!this.state.newTrait.secondaryStat) return
+			//this means we're editing a trait, remove the old one
+			if (this.state.modifyingTrait > -1) {
+				// preserve the id
+				id = this.state.customTraits.races[this.state.modifyingTrait].id
+				this.state.customTraits.races.splice(this.state.modifyingTrait, 1)
+			}
+			let Stats = {
+				[this.state.newTrait.primaryStat]: 2,
+				[this.state.newTrait.secondaryStat]: 1,
+			}
+			let Abilities = []
+			if (this.state.newTrait.ability) {
+				Abilities = this.state.newTrait.ability.split("\n")
+			}
+			// add the new trait/version
+			this.state.customTraits.races.unshift({
+				Reroll: 0,
+				Abilities,
+				Name: this.state.newTrait.Name,
+				Properties: [id + ""],
+				primaryStat: this.state.newTrait.primaryStat,
+				secondaryStat: this.state.newTrait.secondaryStat,
+				Stats,
+				id,
+			})
+			let traitsClone = {
+				...this.state.customTraits
+			}
+			//go back in modal
+			this.setState({customizePage: "races", newTrait: {}, modifyingTrait: -1, customTraits: traitsClone})
+		}
+		if (this.state.customizePage === "editClass") {
+			//validate
+			if (!this.state.newTrait.Name) return
+			if (!this.state.newTrait.primaryStat) return
+			if (!this.state.newTrait.secondaryStat) return
+			if (!this.state.newTrait.weapon) return
+			if (!this.state.newTrait.armor) return
+			//this means we're editing a trait, remove the old one
+			if (this.state.modifyingTrait > -1) {
+				// preserve the id
+				id = this.state.customTraits.classes[this.state.modifyingTrait].id
+				this.state.customTraits.classes.splice(this.state.modifyingTrait, 1)
+			}
+			let Stat_Requirements = {
+				[this.state.newTrait.primaryStat]: 14,
+				[this.state.newTrait.secondaryStat]: 12,
+			}
+			// we use additional abilities instead of abilities because we want all listed, not just 1
+			let AdditionalAbilities = []
+			if (this.state.newTrait.ability) {
+				AdditionalAbilities = this.state.newTrait.ability.split("\n")
+			}
+			// now we need to create lists of weapons/armor based on user selection
+			let Equipment
+			let EquipmentSecond
+			switch (this.state.newTrait.weapon) {
+				case "one-melee":
+					Equipment = ["Mace (1d6)","Light Hammer (1d4)","Flail (1d8)","Handaxe (1d6)", "War Pick (1d8)", "Javelin (1d6)", "Morningstar (1d8)"]
+					break
+				case "two-melee":
+					Equipment = ["Battleaxe (1d8/1d10)","Greatclub (1d8)","Longsword (1d8/1d10)","Warhammer (1d8/1d10)", "Greataxe (1d12)", "Greatsword (2d6)", "Halberd (1d10)", "Maul (2d6)", "Pike (1d10)"]
+					break
+				case "finesse-melee":
+					Equipment = ["Dagger x2 (1d4 Finesse)", "Shortsword (1d6 Finesse)", "Rapier (1d8 Finesse)", "Scimitar (1d6 Finesse)", "Whip (1d4 Finesse Reach)"]
+					break
+				case "bows":
+					Equipment = ["Shortbow (1d6)","Longbow (1d8)", "Light Crossbow (1d8)", "Heavy Crossbow (1d10)"]
+					break
+				case "magic":
+					Equipment = ["Magic Missile Wand (2) (2x 1d4+1 Auto-hit)", "Alchemist's Fire Guiding Flask (2) (range spell attack, 1d4 per turn until put out (DC 10 DEX action)", "Frost Staff (ranged spell attack, 1d8)", "Staff of Fear (3) (spell save, fear for 2 turns)", "Shocking Wand (ranged spell attack, 3d2)", "Wand of Jitters (ranged spell attack, disarm and knock prone)"]
+					break
+			}
+			switch (this.state.newTrait.armor) {
+				case "none":
+					EquipmentSecond = ["Silk Robes", "Tunic", "Rags", "Cloak", "Shirtless", "Tight Clothes", "Pelt Coat"]
+					break
+				case "light":
+					EquipmentSecond = ["Leather Armor","Padded Armor","Studded Leather Armor"]
+					break
+				case "medium":
+					EquipmentSecond = ["Scale Mail Armor","Hide Armor","Chain Shirt Armor","Breastplate Armor","Half Plate Armor"]
+					break
+				case "heavy":
+					EquipmentSecond = ["Ring Mail Armor", "Chain Mail Armor", "Splint Armor", "Plate Armor"]
+					break
+			}
+			// if we have a base class, add it as a property and include its default abilities
+			let props = []
+			let Abilities = []
+			if (this.state.newTrait.base) {
+				props = [this.state.newTrait.base]
+				let basedClass = this.getAllClasses().find(x => x.Properties[0] === this.state.newTrait.base)
+				Abilities = basedClass.Abilities
+				if (basedClass.AdditionalAbilities) {
+					AdditionalAbilities = AdditionalAbilities.concat(basedClass.AdditionalAbilities)
+				}
+				console.log(Abilities)
+				console.log(AdditionalAbilities)
+			}
+			// add the new trait/version
+			this.state.customTraits.classes.unshift({
+				Reroll: 0,
+				Abilities,
+				AdditionalAbilities,
+				Name: this.state.newTrait.Name,
+				Properties: [id + "", ...props],
+				primaryStat: this.state.newTrait.primaryStat,
+				secondaryStat: this.state.newTrait.secondaryStat,
+				weapon: this.state.newTrait.weapon,
+				armor: this.state.newTrait.armor,
+				Equipment,
+				EquipmentSecond,
+				Stat_Requirements,
+				id,
+				base: this.state.newTrait.base
+			})
+			let traitsClone = {
+				...this.state.customTraits
+			}
+			//go back in modal
+			this.setState({customizePage: "classes", newTrait: {}, modifyingTrait: -1, customTraits: traitsClone})
+		}
 	}
 
 	deleteTrait () {
@@ -1306,6 +1709,24 @@ export default class App extends React.Component {
 		if (this.state.customizePage === "editEquipment") {
 			this.state.customTraits.equipment.splice(this.state.modifyingTrait, 1)
 			page = "equipment"
+		}
+		if (this.state.customizePage === "editRace") {
+			// clear this race on the settings screen if its selected
+			let id = this.state.customTraits.races[this.state.modifyingTrait].id
+			if (this.state.settingsNew.Race === id) {
+				this.state.settingsNew.Race = "Any"
+			}
+			this.state.customTraits.races.splice(this.state.modifyingTrait, 1)
+			page = "races"
+		}
+		if (this.state.customizePage === "editClass") {
+			// clear this class on the settings screen if its selected
+			let id = this.state.customTraits.classes[this.state.modifyingTrait].id
+			if (this.state.settingsNew.Class === id) {
+				this.state.settingsNew.Class = "Any"
+			}
+			this.state.customTraits.classes.splice(this.state.modifyingTrait, 1)
+			page = "classes"
 		}
 		let traitsClone = {
 			...this.state.customTraits
@@ -1370,6 +1791,31 @@ export default class App extends React.Component {
 					levelReq: item.Requirements.Level
 				},
 				customizePage: "editEquipment"
+			})
+		}
+		if (this.state.customizePage === 'races') {
+			this.setState({
+				newTrait: {
+					Name: item.Name,
+					ability: item.Abilities.join('\n'),
+					primaryStat: item.primaryStat,
+					secondaryStat: item.secondaryStat
+				},
+				customizePage: "editRace"
+			})
+		}
+		if (this.state.customizePage === 'classes') {
+			this.setState({
+				newTrait: {
+					Name: item.Name,
+					ability: item.AdditionalAbilities.join('\n'),
+					primaryStat: item.primaryStat,
+					secondaryStat: item.secondaryStat,
+					weapon: item.weapon,
+					armor: item.armor,
+					base: item.base,
+				},
+				customizePage: "editClass"
 			})
 		}
 	}
@@ -1465,6 +1911,24 @@ export default class App extends React.Component {
 			borderWidth: 1,
 			borderColor: '#ffffff',
 			color: '#ffffff',
+		},
+
+		customizeTextInputLarge: {
+			width: '100%', 
+			height: '100%',
+			fontSize: 16,
+			color: '#ffffff',
+			textAlignVertical: 'top'
+		},
+
+		customizeTextInputLargeFrame: {
+			width: '100%', 
+			height: 80,
+			fontSize: 16,
+			borderWidth: 1,
+			borderColor: '#ffffff',
+			paddingLeft: 5,
+			paddingRight: 5,
 		},
 		
 		leftBar: {
@@ -1638,8 +2102,8 @@ export default class App extends React.Component {
 			width: 120,
 			margin: 0,
 			padding: 0,
-			marginTop: -15,
-			height: 60,
+			marginTop: -7,
+			height: 40,
 			color: '#ffffff',
 			transform: [
 				{ scaleX: 1.25 }, 
@@ -1647,11 +2111,24 @@ export default class App extends React.Component {
 			]
 		},
 		
+		modalSettingPickerMed: {
+			width: 100,
+			margin: 0,
+			padding: 0,
+			marginTop: -7,
+			height: 40,
+			color: '#ffffff',
+			transform: [
+				{ scaleX: 1.25 }, 
+				{ scaleY: 1.25 },
+			],
+		},
+		
 		modalSettingPickerThin: {
 			width: 80,
 			margin: 0,
 			padding: 0,
-			marginTop: -8,
+			marginTop: -7,
 			height: 40,
 			color: '#ffffff',
 			transform: [

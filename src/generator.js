@@ -46,7 +46,7 @@ function setTraits (custom) {
 //use to lookup a class for settings optimizations
 function lookupClass(name){
 	for(var i in classes){
-		if(classes[i].Name == name){
+		if(classes[i].Properties.includes(name)){
 			return classes[i]
 		}
 	}
@@ -57,7 +57,7 @@ function lookupClass(name){
 //use to lookup a race for settings optimizations
 function lookupRace(name){
 	for(var i in races){
-		if(races[i].Name == name){
+		if(races[i].Properties.includes(name)){
 			return races[i]
 		}
 	}
@@ -363,9 +363,9 @@ function getClass(charSheet, settings){
 			if(logsOn) console.log(data);
 		}
 			
-		//they don't get a class, the "none" class is index 8
+		//they don't get a class
 		if(charSheet.level == 0){
-			data = classes[7];
+			data =lookupClass("blank-class");
 		}
 		
 		//reroll for class if we random lower than the reroll odds 
@@ -398,7 +398,11 @@ function getClass(charSheet, settings){
 					
 			if(data.EquipmentSecond.length>0){
 				//pick a random second equipment for the class to add
-				charSheet.equipment.push(data.EquipmentSecond[Math.floor(Math.random()*data.EquipmentSecond.length)]);
+				let equip = data.EquipmentSecond[Math.floor(Math.random()*data.EquipmentSecond.length)]
+				charSheet.equipment.push(equip);
+				if (["Silk Robes", "Tunic", "Rags", "Cloak", "Shirtless", "Tight Clothes", "Pelt Coat"].includes(equip)) {
+					charSheet.properties.push("clothes")
+				}
 			}
 					
 					
