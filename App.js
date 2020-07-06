@@ -1,5 +1,5 @@
 import React from 'react';
-import {View, TextInput, ImageBackground, TouchableOpacity, Image, StyleSheet, ScrollView, Text, Keyboard, FlatList, AppState, AsyncStorage, Modal, Picker, Dimensions}  from 'react-native';
+import {View, TextInput, ImageBackground, TouchableOpacity, Image, StyleSheet, ScrollView, Text, Keyboard, FlatList, AppState, AsyncStorage, Modal, Picker, Dimensions, Alert }  from 'react-native';
 import generator from './src/generator.js'
 import {Mutex, MutexInterface} from 'async-mutex'
 import MultiSelect from 'react-native-multiple-select';
@@ -22,6 +22,8 @@ export default class App extends React.Component {
 			<ImageBackground 
 				source={require('./src/Parchment.png')}
 				style={this.styles.background}>
+				
+				{this.state.messages.intro && <View style={this.styles.overlay} />}
 				
 				<Modal
 					animationType="fade"
@@ -842,7 +844,10 @@ export default class App extends React.Component {
 								<Picker
 									selectedValue={this.state.newTrait.base}
 									style={this.styles.modalSettingPicker}
-									onValueChange={(itemValue, itemIndex) => this.setSetting("base", itemValue, 'newTrait')}
+									onValueChange={(itemValue, itemIndex) => {
+										this.useBaseFirstTime()
+										this.setSetting("base", itemValue, 'newTrait')
+									}}
 									mode="dropdown" >
 									<Picker.Item label="None" value="" />
 									{this.state.customTraits.classes.filter((clas, index) => 
@@ -914,11 +919,13 @@ export default class App extends React.Component {
 										onValueChange={(itemValue, itemIndex) => this.setSetting("weapon", itemValue, 'newTrait')}
 										mode="dropdown" >
 										<Picker.Item label="Pick" value="" />
+										<Picker.Item label="None" value="none" />
 										<Picker.Item label="One-handed Melee" value="one-melee" />
 										<Picker.Item label="Two-handed Melee" value="two-melee" />
 										<Picker.Item label="Finesse Melee" value="finesse-melee" />
 										<Picker.Item label="Bows" value="bows" />
 										<Picker.Item label="Magic" value="magic" />
+										<Picker.Item label="Instruments" value="instrument" />
 									</Picker>
 								</View>
 							</View>
@@ -960,7 +967,7 @@ export default class App extends React.Component {
 				
 				<View style={this.styles.topBar}>
 				
-					<View style={this.styles.cornerContainer}>
+					<View style={[this.styles.cornerContainer, this.state.introStep === 2 ? this.styles.overOverlay : {}]}>
 						<TouchableOpacity onPress={this.deleteCharacter}>
 							<Image
 								source={require('./src/shieldX.png')}
@@ -970,13 +977,13 @@ export default class App extends React.Component {
 					</View>
 			
 					<View style={this.styles.bigButtonContainer}>
-						<TouchableOpacity onPress={() => this.newCharacter("settingsNew")}>
+						<TouchableOpacity onPress={() => this.newCharacter("settingsNew")} style={this.state.introStep === 0 ? this.styles.overOverlay : {}}>
 							<Image
 								source={require('./src/signNewSolo.png')}
 								style={this.styles.bigButtonLeft}
 							/>
 						</TouchableOpacity>
-						<TouchableOpacity onPress={()=>this.showSettings(true)}>
+						<TouchableOpacity onPress={()=>this.showSettings(true)} style={this.state.introStep === 3 ? this.styles.overOverlay : {}}>
 							<Image
 								source={require('./src/signSmall.png')}
 								style={this.styles.bigButtonRight}
@@ -985,7 +992,7 @@ export default class App extends React.Component {
 					</View>
 				
 				
-					<View style={this.styles.cornerContainer}>
+					<View style={[this.styles.cornerContainer, this.state.introStep === 4 ? this.styles.overOverlay : {}]}>
 						<TouchableOpacity onPress={()=>this.showCustomize(true)}>
 							<Image
 								source={require('./src/shieldGear.png')}
@@ -1003,22 +1010,28 @@ export default class App extends React.Component {
 						keyExtractor={this._keyCharacterShield}
 						renderItem={this._renderCharacterShield}
 						ref={component => this._listScroll = component}
-						style={this.styles.leftBar}
+						style={[this.styles.leftBar, this.state.introStep === 1 ? this.styles.overOverlay : {}]}
 					/>
 				
 					<ScrollView 
 						ref={component => this._textScroll = component}
-						style={this.styles.rightText}>
+						style={[this.styles.rightText, this.state.messages.intro ? this.styles.overOverlay : {}]}>
 						<View style={this.keyboardPadding()}>
-							{this.state.showText && 
-							<TextInput
-								style={this.styles.textArea}
-								value={this.state.charText}
-								onChangeText={(value) => this.setState({ charText: value })}
-								multiline={true}
-								ref={component => this._text = component}
-								underlineColorAndroid='transparent'
-							/>}
+							{this.state.messages.intro &&
+								<Text style={this.styles.introText} >
+									{this.getIntroText()}
+								</Text>
+							}
+							{this.state.showText && !this.state.messages.intro &&
+								<TextInput
+									style={this.styles.textArea}
+									value={this.state.charText}
+									onChangeText={(value) => this.setState({ charText: value })}
+									multiline={true}
+									ref={component => this._text = component}
+									underlineColorAndroid='transparent'
+								/>
+							}
 						</View>
 					</ScrollView>
 				
@@ -1167,6 +1180,12 @@ export default class App extends React.Component {
 			showText: false,
 			settingsVisible: false,
 			customizeVisible: false,
+			messages: {
+				baseWarning: true,
+				classWarning: true,
+				intro: true,
+			},
+			introStep: 0,
 			validate: false,
 			modifyingTrait: -1,
 			customizePage: 'default',
@@ -1212,12 +1231,18 @@ export default class App extends React.Component {
 		this.saveTrait = this.saveTrait.bind(this);
 		this.deleteTrait = this.deleteTrait.bind(this);
 		this.getAllClasses = this.getAllClasses.bind(this);
+		this.saveClassFirstTime = this.saveClassFirstTime.bind(this)
+		this.useBaseFirstTime = this.useBaseFirstTime.bind(this)
+		this.getIntroText = this.getIntroText.bind(this)
 	
 		AsyncStorage.getItem("characters", (error, result) => {
 			if(result && !error) this.setState({characters: JSON.parse(result), showText: true});
-		});/*
+		});
 		AsyncStorage.getItem("traits", (error, result) => {
 			if(result && !error) this.setState({customTraits: JSON.parse(result)});
+		});/*
+		AsyncStorage.getItem("messages", (error, result) => {
+			if(result && !error) this.setState({messages: JSON.parse(result)});
 		});*/
 	}
 	
@@ -1228,6 +1253,7 @@ export default class App extends React.Component {
 	newCharacter(settingsPage) {
 		if(!this.mutex.isLocked()){
 			this.mutex.acquire().then(release=>{
+				if (this.state.messages.intro) this.setState({introStep: this.state.introStep + 1});
 				this.saveCharacter();
 				// default empty custom traits
 				let additionalTraits = {
@@ -1265,6 +1291,7 @@ export default class App extends React.Component {
 	showCharacter(index, save) {
 		if(!this.mutex.isLocked()){
 			this.mutex.acquire().then(release=>{
+				if (this.state.messages.intro && this.state.introStep === 1) this.setState({introStep: this.state.introStep + 1});
 				if(save){
 					this.saveCharacter();
 				}
@@ -1289,6 +1316,7 @@ export default class App extends React.Component {
 	deleteCharacter() {
 		if(!this.mutex.isLocked()){
 			this.mutex.acquire().then(release=>{
+				if (this.state.messages.intro) this.setState({introStep: this.state.introStep + 1});
 				// do nothing if list is empty
 				if(this.state.index != -1){
 					
@@ -1357,12 +1385,21 @@ export default class App extends React.Component {
 	
 	// displys the settings modal when the user clicks the gear icon
 	showSettings(show) {
+		if (this.state.messages.intro) {
+			this.setState({introStep: this.state.introStep + 1});
+			return
+		}
 		this.setState({settingsVisible: show});
 	}
 	
 	
 	// displys the settings modal when the user clicks the gear icon
 	showCustomize(show) {
+		if (this.state.messages.intro) {
+			this.setState({messages: {...this.state.messages, intro: false}});
+			this.state.messages.intro = false
+			return
+		}
 		this.setState({customizeVisible: show});
 	}
 	
@@ -1385,6 +1422,7 @@ export default class App extends React.Component {
 			this.saveCharacter();
 			AsyncStorage.setItem("characters", JSON.stringify(this.state.characters));
 			AsyncStorage.setItem("traits", JSON.stringify(this.state.customTraits));
+			AsyncStorage.setItem("messages", JSON.stringify(this.state.messages));
 		}
 	} 
 	
@@ -1413,6 +1451,34 @@ export default class App extends React.Component {
 		if(bool) checkBox = require('./src/full_checkbox.png');
 		
 		return checkBox;
+	}
+
+	useBaseFirstTime () {
+		if (this.state.messages.baseWarning) {
+			this.setState({messages: {...this.state.messages, baseWarning: false}})
+			Alert.alert(
+				"Base Class",
+				"Custom classes inherit all of the base class's abilities. While this gives a nice fleshed-out class to go off of, it can also \"drown out\" your own custom abilities for this class!",
+				[
+					{ text: "OK", onPress: () => {}}
+				],
+				{ cancelable: true }
+			);
+		}
+	}
+
+	saveClassFirstTime () {
+		if (this.state.messages.classWarning) {
+			this.setState({messages: {...this.state.messages, classWarning: false}})
+			Alert.alert(
+				"Custom Class",
+				"Congrats on making your first class! You should now navigate to the custom abilities section to create class-specific abilities for this class!",
+				[
+					{ text: "OK", onPress: () => {}}
+				],
+				{ cancelable: true }
+			);
+		}
 	}
 
 	saveTrait () {
@@ -1599,6 +1665,7 @@ export default class App extends React.Component {
 				this.setState({validate: true})
 				return
 			}
+			this.saveClassFirstTime()
 			//this means we're editing a trait, remove the old one
 			if (this.state.modifyingTrait > -1) {
 				// preserve the id
@@ -1618,6 +1685,9 @@ export default class App extends React.Component {
 			let Equipment
 			let EquipmentSecond
 			switch (this.state.newTrait.weapon) {
+				case "none":
+					Equipment = []
+					break
 				case "one-melee":
 					Equipment = ["Mace (1d6)","Light Hammer (1d4)","Flail (1d8)","Handaxe (1d6)", "War Pick (1d8)", "Javelin (1d6)", "Morningstar (1d8)"]
 					break
@@ -1632,6 +1702,9 @@ export default class App extends React.Component {
 					break
 				case "magic":
 					Equipment = ["Magic Missile Wand (2) (2x 1d4+1 Auto-hit)", "Alchemist's Fire Guiding Flask (2) (range spell attack, 1d4 per turn until put out (DC 10 DEX action)", "Frost Staff (ranged spell attack, 1d8)", "Staff of Fear (3) (spell save, fear for 2 turns)", "Shocking Wand (ranged spell attack, 3d2)", "Wand of Jitters (ranged spell attack, disarm and knock prone)"]
+					break
+				case "instrument":
+					Equipment = ["Tamborine", "Lute", "Flute", "Pan Flute", "Fiddle", "Recorder", "Ocarina", "Drum", "Bagpipes", "Lyre", "Dulcimer", "Horn", "Shawm", "Viol"]
 					break
 			}
 			switch (this.state.newTrait.armor) {
@@ -1658,8 +1731,6 @@ export default class App extends React.Component {
 				if (basedClass.AdditionalAbilities) {
 					AdditionalAbilities = AdditionalAbilities.concat(basedClass.AdditionalAbilities)
 				}
-				console.log(Abilities)
-				console.log(AdditionalAbilities)
 			}
 			// add the new trait/version
 			this.state.customTraits.classes.unshift({
@@ -1675,6 +1746,7 @@ export default class App extends React.Component {
 				Equipment,
 				EquipmentSecond,
 				Stat_Requirements,
+				ability: this.state.newTrait.ability,
 				id,
 				base: this.state.newTrait.base
 			})
@@ -1813,7 +1885,7 @@ export default class App extends React.Component {
 				validate: true,
 				newTrait: {
 					Name: item.Name,
-					ability: item.AdditionalAbilities.join('\n'),
+					ability: item.ability,
 					primaryStat: item.primaryStat,
 					secondaryStat: item.secondaryStat,
 					weapon: item.weapon,
@@ -1829,6 +1901,14 @@ export default class App extends React.Component {
 		let classes = this.state.customTraits.classes.concat(require('./src/Class.js').placeholder)
 		classes = classes.filter(x => x.Name !== "None")
 		return classes
+	}
+
+	getIntroText () {
+		if (this.state.introStep === 0) return "Click here to create a new NPC"
+		if (this.state.introStep === 1) return "Click here to select an NPC (does nothing right now). Normally you see NPC data here where this text is, which you can tap to edit."
+		if (this.state.introStep === 2) return "Click here to delete the currently selected NPC"
+		if (this.state.introStep === 3) return "Clicking here allows you to adjust settings for the NEW button. Use this if you want a specific type of NPC (level, class, etc)."
+		if (this.state.introStep === 4) return "Clicking here allows you to create your own content! Add classes, personalities, equipment, etc which will be used when generating new NPCs!"
 	}
 	
 	
@@ -2175,6 +2255,25 @@ export default class App extends React.Component {
 		transOutline: {
 			margin: 2,
 		},
+
+		overlay: {
+			position: 'absolute',
+			width: '100%',
+			height: '100%', 
+			opacity: 0.8,
+			backgroundColor: 'black',
+			zIndex: 10
+		},
+
+		overOverlay: {
+			zIndex: 100
+		},
+
+		introText: {
+			color: '#ffffff',
+			fontSize: 30,
+			padding: 20,
+		}
 	});
 	
   
