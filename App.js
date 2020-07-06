@@ -23,7 +23,7 @@ export default class App extends React.Component {
 				source={require('./src/Parchment.png')}
 				style={this.styles.background}>
 				
-				{this.state.messages.intro && <View style={this.styles.overlay} />}
+				{this.state.messages.intro && this.state.loaded && <View style={this.styles.overlay} />}
 				
 				<Modal
 					animationType="fade"
@@ -1017,7 +1017,7 @@ export default class App extends React.Component {
 						ref={component => this._textScroll = component}
 						style={[this.styles.rightText, this.state.messages.intro ? this.styles.overOverlay : {}]}>
 						<View style={this.keyboardPadding()}>
-							{this.state.messages.intro &&
+							{this.state.messages.intro && this.state.loaded &&
 								<Text style={this.styles.introText} >
 									{this.getIntroText()}
 								</Text>
@@ -1185,6 +1185,7 @@ export default class App extends React.Component {
 				classWarning: true,
 				intro: true,
 			},
+			loaded: false,
 			introStep: 0,
 			validate: false,
 			modifyingTrait: -1,
@@ -1240,10 +1241,14 @@ export default class App extends React.Component {
 		});
 		AsyncStorage.getItem("traits", (error, result) => {
 			if(result && !error) this.setState({customTraits: JSON.parse(result)});
-		});/*
+		});
 		AsyncStorage.getItem("messages", (error, result) => {
 			if(result && !error) this.setState({messages: JSON.parse(result)});
-		});*/
+			this.setState({loaded: true})
+		});
+		AsyncStorage.getItem("settings", (error, result) => {
+			if(result && !error) this.setState({settingsNew: JSON.parse(result)});
+		});
 	}
 	
 	//only 1 function may run at once
@@ -1316,7 +1321,10 @@ export default class App extends React.Component {
 	deleteCharacter() {
 		if(!this.mutex.isLocked()){
 			this.mutex.acquire().then(release=>{
-				if (this.state.messages.intro) this.setState({introStep: this.state.introStep + 1});
+				if (this.state.messages.intro)  {
+					this.setState({introStep: this.state.introStep + 1});
+					if (this.state.characters.length > 1) return release()
+				}
 				// do nothing if list is empty
 				if(this.state.index != -1){
 					
@@ -1397,7 +1405,6 @@ export default class App extends React.Component {
 	showCustomize(show) {
 		if (this.state.messages.intro) {
 			this.setState({messages: {...this.state.messages, intro: false}});
-			this.state.messages.intro = false
 			return
 		}
 		this.setState({customizeVisible: show});
@@ -1423,6 +1430,7 @@ export default class App extends React.Component {
 			AsyncStorage.setItem("characters", JSON.stringify(this.state.characters));
 			AsyncStorage.setItem("traits", JSON.stringify(this.state.customTraits));
 			AsyncStorage.setItem("messages", JSON.stringify(this.state.messages));
+			AsyncStorage.setItem("settings", JSON.stringify(this.state.settingsNew));
 		}
 	} 
 	
@@ -1905,10 +1913,10 @@ export default class App extends React.Component {
 
 	getIntroText () {
 		if (this.state.introStep === 0) return "Click here to create a new NPC"
-		if (this.state.introStep === 1) return "Click here to select an NPC (does nothing right now). Normally you see NPC data here where this text is, which you can tap to edit."
+		if (this.state.introStep === 1) return "Click here to select an NPC. This does nothing right now, but normally you see NPC data here where this text is, which you can tap to edit."
 		if (this.state.introStep === 2) return "Click here to delete the currently selected NPC"
-		if (this.state.introStep === 3) return "Clicking here allows you to adjust settings for the NEW button. Use this if you want a specific type of NPC (level, class, etc)."
-		if (this.state.introStep === 4) return "Clicking here allows you to create your own content! Add classes, personalities, equipment, etc which will be used when generating new NPCs!"
+		if (this.state.introStep === 3) return "Clicking here allows you to adjust new NPC settings."
+		if (this.state.introStep === 4) return "Clicking here allows you to add your own content! Create classes, personalities, equipment, etc which will be used when generating new NPCs!"
 	}
 	
 	
