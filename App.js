@@ -833,7 +833,10 @@ export default class App extends React.Component {
 									<TextInput
 										style={this.styles.customizeTextInputLarge}
 										value={this.state.newTrait.ability}
-										onChangeText={(value) => this.setSetting('ability', value, 'newTrait')}
+										onChangeText={(value) => {
+											this.warnChangingDependents();
+											this.setSetting('ability', value, 'newTrait');
+										}}
 										multiline={true}
 										underlineColorAndroid='transparent'
 									/>
@@ -846,7 +849,10 @@ export default class App extends React.Component {
 									style={this.styles.modalSettingPicker}
 									onValueChange={(itemValue, itemIndex) => {
 										this.useBaseFirstTime()
-										this.setSetting("base", itemValue, 'newTrait')
+										if (!this.checkCircularDepndency(itemValue)){
+											this.warnChangingDependents()
+											this.setSetting("base", itemValue, 'newTrait')
+										}
 									}}
 									mode="dropdown" >
 									<Picker.Item label="None" value="" />
@@ -955,7 +961,9 @@ export default class App extends React.Component {
 								<TouchableOpacity
 									activeOpacity={0.5}
 									style={[this.styles.deleteButton, this.state.modifyingTrait > -1 ? this.styles.visible : this.styles.hidden]}
-									onPress={this.deleteTrait}>
+									onPress={() => {
+										if (this.tryToDeleteClass()) this.deleteTrait()
+									}}>
 									<Text style={this.styles.modalSettingButtonRed}>Delete</Text>
 								</TouchableOpacity>
 							</View>
@@ -1231,11 +1239,16 @@ export default class App extends React.Component {
 		this.showCustomize = this.showCustomize.bind(this);
 		this.saveTrait = this.saveTrait.bind(this);
 		this.deleteTrait = this.deleteTrait.bind(this);
+		this.tryToDeleteClass = this.tryToDeleteClass.bind(this)
 		this.getAllClasses = this.getAllClasses.bind(this);
 		this.saveClassFirstTime = this.saveClassFirstTime.bind(this)
 		this.useBaseFirstTime = this.useBaseFirstTime.bind(this)
 		this.getIntroText = this.getIntroText.bind(this)
-	
+		this.warnChangingDependents = this.warnChangingDependents.bind(this)
+		this.updateClassBase = this.updateClassBase.bind(this)
+		this.getClassAsNewTrait = this.getClassAsNewTrait.bind(this)
+		this.getNewClass = this.getNewClass.bind(this)
+
 		AsyncStorage.getItem("characters", (error, result) => {
 			if(result && !error) this.setState({characters: JSON.parse(result), showText: true});
 		});
@@ -1475,6 +1488,75 @@ export default class App extends React.Component {
 		}
 	}
 
+	warnChangingDependents () {
+		let dependents = this.getDependents(this.state.newTrait.id)
+		if (dependents.length > 0) {
+			Alert.alert(
+				"Dependent Classes",
+				"One or more classes are based on this class. This will affect them if you save.",
+				[
+					{ text: "OK", onPress: () => {}}
+				],
+				{ cancelable: true }
+			);
+		}
+	}
+
+	// does not check for dependents of dependents
+	getDependents (id) {
+		let dependents = []
+		for (let clas of this.state.customTraits.classes) {
+			if (clas.base) {
+				if (clas.base == id) dependents.push(clas)
+			}
+		}
+		return dependents
+	}
+
+	checkCircularDepndency (newBase) {
+		let circularDependence = this.checkCircDepRecursive(this.state.newTrait.id, newBase)
+		if (circularDependence) {
+			Alert.alert(
+				"Circular Dependency",
+				"The class you are trying to base off of is either directly or indirectly based off this one. You cannot make circular dependencies.",
+				[
+					{ text: "OK", onPress: () => {}}
+				],
+				{ cancelable: true }
+			);
+			return true
+		}
+		else {
+			return false
+		}
+	}
+
+	// id wants to rely on newBase. does newBase rely on id?
+	checkCircDepRecursive (id, newBase) {
+		if (!id || !newBase) return false
+		else {
+			// find the new base
+			for (let clas of this.state.customTraits.classes) {
+				if (clas.id == newBase) {
+					// found it
+					if (clas.base == id) {
+						// exit condition, newBase relies on id
+						return true
+					}
+					else if (clas.base) {
+						// newbase doesnt rely on id, but it does rely on another class. does that class rely on id?
+						if (this.checkCircDepRecursive(id, clas.id)) {
+							// yup, newBase is indirectly based on id
+							return true
+						}
+					}
+
+				}
+			}
+			return false
+		}
+	}
+
 	saveClassFirstTime () {
 		if (this.state.messages.classWarning) {
 			this.setState({messages: {...this.state.messages, classWarning: false}})
@@ -1502,7 +1584,7 @@ export default class App extends React.Component {
 			//this means we're editing a trait, remove the old one
 			if (this.state.modifyingTrait > -1) {
 				// preserve the id
-				id = this.state.customTraits.personalities[this.state.modifyingTrait].id
+				id = this.state.newTrait.id
 				this.state.customTraits.personalities.splice(this.state.modifyingTrait, 1)
 			}
 			//add the new trait/version
@@ -1529,7 +1611,7 @@ export default class App extends React.Component {
 			//this means we're editing a trait, remove the old one
 			if (this.state.modifyingTrait > -1) {
 				// preserve the id
-				id = this.state.customTraits.appearences[this.state.modifyingTrait].id
+				id = this.state.newTrait.id
 				this.state.customTraits.appearences.splice(this.state.modifyingTrait, 1)
 			}
 			//add the new trait/version
@@ -1572,7 +1654,7 @@ export default class App extends React.Component {
 			//this means we're editing a trait, remove the old one
 			if (this.state.modifyingTrait > -1) {
 				// preserve the id
-				id = this.state.customTraits.abilities[this.state.modifyingTrait].id
+				id = this.state.newTrait.id
 				this.state.customTraits.abilities.splice(this.state.modifyingTrait, 1)
 			}
 			let description = this.state.newTrait.Name + (this.state.newTrait.description ? ": " + this.state.newTrait.description : "")
@@ -1605,7 +1687,7 @@ export default class App extends React.Component {
 			//this means we're editing a trait, remove the old one
 			if (this.state.modifyingTrait > -1) {
 				// preserve the id
-				id = this.state.customTraits.equipment[this.state.modifyingTrait].id
+				id = this.state.newTrait.id
 				this.state.customTraits.equipment.splice(this.state.modifyingTrait, 1)
 			}
 			let description = this.state.newTrait.Name + (this.state.newTrait.description ? ": " + this.state.newTrait.description : "")
@@ -1638,7 +1720,7 @@ export default class App extends React.Component {
 			//this means we're editing a trait, remove the old one
 			if (this.state.modifyingTrait > -1) {
 				// preserve the id
-				id = this.state.customTraits.races[this.state.modifyingTrait].id
+				id = this.state.newTrait.id
 				this.state.customTraits.races.splice(this.state.modifyingTrait, 1)
 			}
 			let Stats = {
@@ -1676,93 +1758,106 @@ export default class App extends React.Component {
 			this.saveClassFirstTime()
 			//this means we're editing a trait, remove the old one
 			if (this.state.modifyingTrait > -1) {
-				// preserve the id
-				id = this.state.customTraits.classes[this.state.modifyingTrait].id
+				// id is preserved by getNewClass
 				this.state.customTraits.classes.splice(this.state.modifyingTrait, 1)
 			}
-			let Stat_Requirements = {
-				[this.state.newTrait.primaryStat]: 14,
-				[this.state.newTrait.secondaryStat]: 12,
+			else {
+				// add new id
+				this.state.newTrait.id = id
 			}
-			// we use additional abilities instead of abilities because we want all listed, not just 1
-			let AdditionalAbilities = []
-			if (this.state.newTrait.ability) {
-				AdditionalAbilities = this.state.newTrait.ability.split("\n")
-			}
-			// now we need to create lists of weapons/armor based on user selection
-			let Equipment
-			let EquipmentSecond
-			switch (this.state.newTrait.weapon) {
-				case "none":
-					Equipment = []
-					break
-				case "one-melee":
-					Equipment = ["Mace (1d6)","Light Hammer (1d4)","Flail (1d8)","Handaxe (1d6)", "War Pick (1d8)", "Javelin (1d6)", "Morningstar (1d8)"]
-					break
-				case "two-melee":
-					Equipment = ["Battleaxe (1d8/1d10)","Greatclub (1d8)","Longsword (1d8/1d10)","Warhammer (1d8/1d10)", "Greataxe (1d12)", "Greatsword (2d6)", "Halberd (1d10)", "Maul (2d6)", "Pike (1d10)"]
-					break
-				case "finesse-melee":
-					Equipment = ["Dagger x2 (1d4 Finesse)", "Shortsword (1d6 Finesse)", "Rapier (1d8 Finesse)", "Scimitar (1d6 Finesse)", "Whip (1d4 Finesse Reach)"]
-					break
-				case "bows":
-					Equipment = ["Shortbow (1d6)","Longbow (1d8)", "Light Crossbow (1d8)", "Heavy Crossbow (1d10)"]
-					break
-				case "magic":
-					Equipment = ["Magic Missile Wand (2) (2x 1d4+1 Auto-hit)", "Alchemist's Fire Guiding Flask (2) (range spell attack, 1d4 per turn until put out (DC 10 DEX action)", "Frost Staff (ranged spell attack, 1d8)", "Staff of Fear (3) (spell save, fear for 2 turns)", "Shocking Wand (ranged spell attack, 3d2)", "Wand of Jitters (ranged spell attack, disarm and knock prone)"]
-					break
-				case "instrument":
-					Equipment = ["Tamborine", "Lute", "Flute", "Pan Flute", "Fiddle", "Recorder", "Ocarina", "Drum", "Bagpipes", "Lyre", "Dulcimer", "Horn", "Shawm", "Viol"]
-					break
-			}
-			switch (this.state.newTrait.armor) {
-				case "none":
-					EquipmentSecond = ["Silk Robes", "Tunic", "Rags", "Cloak", "Shirtless", "Tight Clothes", "Pelt Coat"]
-					break
-				case "light":
-					EquipmentSecond = ["Leather Armor","Padded Armor","Studded Leather Armor"]
-					break
-				case "medium":
-					EquipmentSecond = ["Scale Mail Armor","Hide Armor","Chain Shirt Armor","Breastplate Armor","Half Plate Armor"]
-					break
-				case "heavy":
-					EquipmentSecond = ["Ring Mail Armor", "Chain Mail Armor", "Splint Armor", "Plate Armor"]
-					break
-			}
-			// if we have a base class, add it as a property and include its default abilities
-			let props = []
-			let Abilities = []
-			if (this.state.newTrait.base) {
-				props = [this.state.newTrait.base]
-				let basedClass = this.getAllClasses().find(x => x.Properties[0] === this.state.newTrait.base)
-				Abilities = basedClass.Abilities
-				if (basedClass.AdditionalAbilities) {
-					AdditionalAbilities = AdditionalAbilities.concat(basedClass.AdditionalAbilities)
-				}
-			}
-			// add the new trait/version
-			this.state.customTraits.classes.unshift({
-				Reroll: 0,
-				Abilities,
-				AdditionalAbilities,
-				Name: this.state.newTrait.Name,
-				Properties: [id + "", ...props],
-				primaryStat: this.state.newTrait.primaryStat,
-				secondaryStat: this.state.newTrait.secondaryStat,
-				weapon: this.state.newTrait.weapon,
-				armor: this.state.newTrait.armor,
-				Equipment,
-				EquipmentSecond,
-				Stat_Requirements,
-				ability: this.state.newTrait.ability,
-				id,
-				base: this.state.newTrait.base
-			})
+			this.state.customTraits.classes.unshift(getNewClass(this.state.newTrait))
 			let traitsClone = {
 				...this.state.customTraits
 			}
 			//go back in modal
-			this.setState({customizePage: "classes", newTrait: {}, modifyingTrait: -1, customTraits: traitsClone})
+			this.setState({customizePage: "classes", newTrait: {}, modifyingTrait: -1, customTraits: traitsClone}, () => {
+				// after state has been set, go through all dependents and update them
+				for (let clas of this.getDependents(this.newTrait.id)) {
+					this.updateClassBase(clas)
+				}
+			})
+		}
+	}
+
+	// creates a new class given the trait blueprint. similar to other traits in saveTrait but we reuse this code for updating class dependencies
+	getNewClass (trait) {
+		let Stat_Requirements = {
+			[trait.primaryStat]: 14,
+			[trait.secondaryStat]: 12,
+		}
+		// we use additional abilities instead of abilities because we want all listed, not just 1
+		let AdditionalAbilities = []
+		if (trait.ability) {
+			AdditionalAbilities = trait.ability.split("\n")
+		}
+		// now we need to create lists of weapons/armor based on user selection
+		let Equipment
+		let EquipmentSecond
+		switch (trait.weapon) {
+			case "none":
+				Equipment = []
+				break
+			case "one-melee":
+				Equipment = ["Mace (1d6)","Light Hammer (1d4)","Flail (1d8)","Handaxe (1d6)", "War Pick (1d8)", "Javelin (1d6)", "Morningstar (1d8)"]
+				break
+			case "two-melee":
+				Equipment = ["Battleaxe (1d8/1d10)","Greatclub (1d8)","Longsword (1d8/1d10)","Warhammer (1d8/1d10)", "Greataxe (1d12)", "Greatsword (2d6)", "Halberd (1d10)", "Maul (2d6)", "Pike (1d10)"]
+				break
+			case "finesse-melee":
+				Equipment = ["Dagger x2 (1d4 Finesse)", "Shortsword (1d6 Finesse)", "Rapier (1d8 Finesse)", "Scimitar (1d6 Finesse)", "Whip (1d4 Finesse Reach)"]
+				break
+			case "bows":
+				Equipment = ["Shortbow (1d6)","Longbow (1d8)", "Light Crossbow (1d8)", "Heavy Crossbow (1d10)"]
+				break
+			case "magic":
+				Equipment = ["Magic Missile Wand (2) (2x 1d4+1 Auto-hit)", "Alchemist's Fire Guiding Flask (2) (range spell attack, 1d4 per turn until put out (DC 10 DEX action)", "Frost Staff (ranged spell attack, 1d8)", "Staff of Fear (3) (spell save, fear for 2 turns)", "Shocking Wand (ranged spell attack, 3d2)", "Wand of Jitters (ranged spell attack, disarm and knock prone)"]
+				break
+			case "instrument":
+				Equipment = ["Tamborine", "Lute", "Flute", "Pan Flute", "Fiddle", "Recorder", "Ocarina", "Drum", "Bagpipes", "Lyre", "Dulcimer", "Horn", "Shawm", "Viol"]
+				break
+		}
+		switch (trait.armor) {
+			case "none":
+				EquipmentSecond = ["Silk Robes", "Tunic", "Rags", "Cloak", "Shirtless", "Tight Clothes", "Pelt Coat"]
+				break
+			case "light":
+				EquipmentSecond = ["Leather Armor","Padded Armor","Studded Leather Armor"]
+				break
+			case "medium":
+				EquipmentSecond = ["Scale Mail Armor","Hide Armor","Chain Shirt Armor","Breastplate Armor","Half Plate Armor"]
+				break
+			case "heavy":
+				EquipmentSecond = ["Ring Mail Armor", "Chain Mail Armor", "Splint Armor", "Plate Armor"]
+				break
+		}
+		// if we have a base class, add it as a property and include its default abilities
+		let props = []
+		let Abilities = []
+		if (trait.base) {
+			props = [trait.base]
+			let basedClass = this.getAllClasses().find(x => x.Properties[0] === trait.base)
+			Abilities = basedClass.Abilities
+			if (basedClass.AdditionalAbilities) {
+				AdditionalAbilities = AdditionalAbilities.concat(basedClass.AdditionalAbilities)
+			}
+		}
+		// add the new trait/version
+		return {
+			Reroll: 0,
+			Abilities,
+			AdditionalAbilities,
+			Name: trait.Name,
+			Properties: [id + "", ...props],
+			primaryStat: trait.primaryStat,
+			secondaryStat: trait.secondaryStat,
+			weapon: trait.weapon,
+			armor: trait.armor,
+			Equipment,
+			EquipmentSecond,
+			Stat_Requirements,
+			ability: trait.ability,
+			id: trait.id,
+			base: trait.base
 		}
 	}
 
@@ -1790,7 +1885,7 @@ export default class App extends React.Component {
 		}
 		if (this.state.customizePage === "editRace") {
 			// clear this race on the settings screen if its selected
-			let id = this.state.customTraits.races[this.state.modifyingTrait].id
+			let id = this.newTrait.id
 			if (this.state.settingsNew.Race === id) {
 				this.state.settingsNew.Race = "Any"
 			}
@@ -1799,7 +1894,7 @@ export default class App extends React.Component {
 		}
 		if (this.state.customizePage === "editClass") {
 			// clear this class on the settings screen if its selected
-			let id = this.state.customTraits.classes[this.state.modifyingTrait].id
+			let id = this.newTrait.id
 			if (this.state.settingsNew.Class === id) {
 				this.state.settingsNew.Class = "Any"
 			}
@@ -1813,6 +1908,51 @@ export default class App extends React.Component {
 		this.setState({customizePage: page, newTrait: {}, modifyingTrait: -1, customTraits: traitsClone})
 	}
 
+	tryToDeleteClass () {
+		// no dependents, go ahead
+		let dependents = this.getDependents(this.newTrait.id)
+		if (dependents.length === 0) return true
+		else {
+			Alert.alert(
+				"Delete base class",
+				"Other classes are based on this class. Are you sure you want to delete it?",
+				[
+					{ text: "Yes", onPress: () => {
+						// go through all dependents and make them based on no class
+						for (let clas of dependents) {
+							this.updateClassBase(clas, "")
+						}
+						// delete the class
+						this.deleteTrait()
+
+					}},
+					{ text: "No", onPress: () => {}}
+				],
+				{ cancelable: false }
+			);
+		}
+	}
+
+	updateClassBase (clas, newBase) {
+		// strip the class down so we can rebuild its
+		let classBlueprint = this.getClassAsNewTrait(clas)
+		if (newBase !== undefined) clasBlueprint.base = newBase
+		// rebuild it, updating the base (new or not) in the proces
+		let updatedClass = this.getNewClass(classBlueprint)
+		// save the class in-place in our classes array
+		for (let index in this.state.customTraits.classes) {
+			let clas = this.state.customTraits.classes[index]
+			if (clas.id == updatedClass.id) {
+				// yes this is the improper way to set state, but its ok here since nothing in the UI needs updating in response to this (because our sub-menus don't render until they're clicked)
+				this.state.customTraits.classes[index] = updatedClass
+			}
+		}
+		// repeat this for our dependents
+		for (let clas of this.getDependents(updatedClass.id)) {
+			this.updateClassBase(clas)
+		}
+	}
+
 	editTrait (item, index) {
 		// remember index so we can update it
 		this.setState({modifyingTrait: index})
@@ -1821,7 +1961,8 @@ export default class App extends React.Component {
 			this.setState({
 				validate: true,
 				newTrait: {
-					Name: item.Name
+					Name: item.Name,
+					id: item.id,
 				},
 				customizePage: "editPersonality"
 			})
@@ -1830,7 +1971,8 @@ export default class App extends React.Component {
 			this.setState({
 				validate: true,
 				newTrait: {
-					Name: item.Name
+					Name: item.Name,
+					id: item.id,
 				},
 				customizePage: "editAppearence"
 			})
@@ -1839,7 +1981,8 @@ export default class App extends React.Component {
 			this.setState({
 				validate: true,
 				newTrait: {
-					Name: item
+					Name: item,
+					id: item.id,
 				},
 				customizePage: "editAccent"
 			})
@@ -1855,7 +1998,8 @@ export default class App extends React.Component {
 					Name: item.Name,
 					description: desc,
 					classReq: item.Requirements.Properties,
-					levelReq: item.Requirements.Level
+					levelReq: item.Requirements.Level,
+					id: item.id,
 				},
 				customizePage: "editAbility"
 			})
@@ -1871,7 +2015,8 @@ export default class App extends React.Component {
 					Name: item.Name,
 					description: desc,
 					classReq: item.Requirements.Properties,
-					levelReq: item.Requirements.Level
+					levelReq: item.Requirements.Level,
+					id: item.id,
 				},
 				customizePage: "editEquipment"
 			})
@@ -1883,7 +2028,8 @@ export default class App extends React.Component {
 					Name: item.Name,
 					ability: item.Abilities.join('\n'),
 					primaryStat: item.primaryStat,
-					secondaryStat: item.secondaryStat
+					secondaryStat: item.secondaryStat,
+					id: item.id,
 				},
 				customizePage: "editRace"
 			})
@@ -1891,17 +2037,22 @@ export default class App extends React.Component {
 		if (this.state.customizePage === 'classes') {
 			this.setState({
 				validate: true,
-				newTrait: {
-					Name: item.Name,
-					ability: item.ability,
-					primaryStat: item.primaryStat,
-					secondaryStat: item.secondaryStat,
-					weapon: item.weapon,
-					armor: item.armor,
-					base: item.base,
-				},
+				newTrait: this.getClassAsNewTrait(item),
 				customizePage: "editClass"
 			})
+		}
+	}
+
+	getClassAsNewTrait (item) {
+		return {
+			Name: item.Name,
+			ability: item.ability,
+			primaryStat: item.primaryStat,
+			secondaryStat: item.secondaryStat,
+			weapon: item.weapon,
+			armor: item.armor,
+			base: item.base,
+			id: item.id,
 		}
 	}
 
