@@ -379,6 +379,9 @@ function getClass(charSheet, settings){
 		else{
 			//concat the properties and abiltiies we read
 			charSheet.properties = charSheet.properties.concat(data.Properties);
+
+			// custom classes set their hp manually
+			if (data.hp) charSheet.hp = data.hp
 					
 			//add ability, random selection incase more than 1
 			if(data.Abilities.length > 0){
@@ -794,23 +797,33 @@ function writeStats(charSheet, settings){
 function writeCombatStats(charSheet, settings){	
 	//calculate HP
 	var hp = 0;
-	var conMod = charSheet.cMOD;
-	if(charSheet.level == 0) hp = 6 + conMod;
-	if(charSheet.properties.includes("wizard")) hp = 6+conMod+((charSheet.level-1)*(4+conMod));
-	if(charSheet.properties.includes("sorcerer")) hp = 6+conMod+((charSheet.level-1)*(4+conMod));
-	if(charSheet.properties.includes("bard")) hp = 8+conMod+((charSheet.level-1)*(5+conMod));
-	if(charSheet.properties.includes("cleric")) hp = 8+conMod+((charSheet.level-1)*(5+conMod));
-	if(charSheet.properties.includes("druid")) hp = 8+conMod+((charSheet.level-1)*(5+conMod));
-	if(charSheet.properties.includes("warlock")) hp = 8+conMod+((charSheet.level-1)*(5+conMod));
-	if(charSheet.properties.includes("druid")) hp = 8+conMod+((charSheet.level-1)*(5+conMod));
-	if(charSheet.properties.includes("monk")) hp = 8+conMod+((charSheet.level-1)*(5+conMod));
-	if(charSheet.properties.includes("artificer")) hp = 8+conMod+((charSheet.level-1)*(5+conMod));
-	if(charSheet.properties.includes("rogue")) hp = 8+conMod+((charSheet.level-1)*(5+conMod));
-	if(charSheet.properties.includes("ranger")) hp = 10+conMod+((charSheet.level-1)*(6+conMod));
-	if(charSheet.properties.includes("fighter")) hp = 10+conMod+((charSheet.level-1)*(6+conMod));
-	if(charSheet.properties.includes("paladin")) hp = 10+conMod+((charSheet.level-1)*(6+conMod));
-	if(charSheet.properties.includes("barbarian")) hp = 12+conMod+((charSheet.level-1)*(7+conMod));
+	var conMod = charSheet.eMOD;
+	if (charSheet.level == 0) hp = 4 + conMod;
 	
+	else {
+		if (charSheet.hp) {
+			if (charSheet.hp == "d6") hp = 6+conMod+((charSheet.level-1)*(4+conMod));
+			if (charSheet.hp == "d8") hp = 8+conMod+((charSheet.level-1)*(5+conMod)); 
+			if (charSheet.hp == "d10") hp = 10+conMod+((charSheet.level-1)*(6+conMod));
+			if (charSheet.hp == "d12") hp = 12+conMod+((charSheet.level-1)*(7+conMod));
+		}
+		else {
+			if(charSheet.properties.includes("wizard")) hp = 6+conMod+((charSheet.level-1)*(4+conMod));
+			if(charSheet.properties.includes("sorcerer")) hp = 6+conMod+((charSheet.level-1)*(4+conMod));
+			if(charSheet.properties.includes("bard")) hp = 8+conMod+((charSheet.level-1)*(5+conMod));
+			if(charSheet.properties.includes("cleric")) hp = 8+conMod+((charSheet.level-1)*(5+conMod));
+			if(charSheet.properties.includes("druid")) hp = 8+conMod+((charSheet.level-1)*(5+conMod));
+			if(charSheet.properties.includes("warlock")) hp = 8+conMod+((charSheet.level-1)*(5+conMod));
+			if(charSheet.properties.includes("monk")) hp = 8+conMod+((charSheet.level-1)*(5+conMod));
+			if(charSheet.properties.includes("artificer")) hp = 8+conMod+((charSheet.level-1)*(5+conMod));
+			if(charSheet.properties.includes("rogue")) hp = 8+conMod+((charSheet.level-1)*(5+conMod));
+			if(charSheet.properties.includes("ranger")) hp = 10+conMod+((charSheet.level-1)*(6+conMod));
+			if(charSheet.properties.includes("fighter")) hp = 10+conMod+((charSheet.level-1)*(6+conMod));
+			if(charSheet.properties.includes("paladin")) hp = 10+conMod+((charSheet.level-1)*(6+conMod));
+			if(charSheet.properties.includes("barbarian")) hp = 12+conMod+((charSheet.level-1)*(7+conMod));
+		}
+	}
+
 	if(charSheet.properties.includes("Durable Feat")) hp += 10;
 	
 	

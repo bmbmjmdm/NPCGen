@@ -791,7 +791,7 @@ export default class App extends React.Component {
 							</TouchableOpacity>
 							<TouchableOpacity
 								activeOpacity={0.5}
-								onPress={() => this.setState({customizePage: 'editClass', validate: false, newTrait: {Name: "", primaryStat: "", secondaryStat: "", ability: "", weapon: "", armor: "", base: ""}, modifyingTrait: -1})}>
+								onPress={() => this.setState({customizePage: 'editClass', validate: false, newTrait: {Name: "", hp: "", primaryStat: "", secondaryStat: "", ability: "", weapon: "", armor: "", base: ""}, modifyingTrait: -1})}>
 								<ImageBackground
 									source={require('./src/eye_red.png')}
 									imageStyle={this.styles.modalImage}
@@ -851,7 +851,9 @@ export default class App extends React.Component {
 										this.useBaseFirstTime()
 										if (!this.checkCircularDepndency(itemValue)){
 											this.warnChangingDependents()
-											this.setSetting("base", itemValue, 'newTrait')
+											this.setSetting("base", itemValue, 'newTrait', () => {
+												this.setClassDefaults(itemValue)
+											})
 										}
 									}}
 									mode="dropdown" >
@@ -948,6 +950,22 @@ export default class App extends React.Component {
 										<Picker.Item label="Light" value="light" />
 										<Picker.Item label="Medium" value="medium" />
 										<Picker.Item label="Heavy" value="heavy" />
+									</Picker>
+								</View>
+							</View>
+							<View style={this.styles.modalSettingContainer}>
+								<Text style={this.styles.modalSettingLabel}>Hit Die</Text>
+								<View style={this.state.validate && !this.state.newTrait.hp ? this.styles.redOutline : this.styles.transOutline}>
+									<Picker
+										selectedValue={this.state.newTrait.hp}
+										style={this.styles.modalSettingPickerMed}
+										onValueChange={(itemValue, itemIndex) => this.setSetting("hp", itemValue, 'newTrait')}
+										mode="dropdown" >
+										<Picker.Item label="Pick" value="" />
+										<Picker.Item label="d6" value="d6" />
+										<Picker.Item label="d8" value="d8" />
+										<Picker.Item label="d10" value="d10" />
+										<Picker.Item label="d12" value="d12" />
 									</Picker>
 								</View>
 							</View>
@@ -1248,6 +1266,7 @@ export default class App extends React.Component {
 		this.updateClassBase = this.updateClassBase.bind(this)
 		this.getClassAsNewTrait = this.getClassAsNewTrait.bind(this)
 		this.getNewClass = this.getNewClass.bind(this)
+		this.setClassDefaults = this.setClassDefaults.bind(this)
 
 		AsyncStorage.getItem("characters", (error, result) => {
 			if(result && !error) this.setState({characters: JSON.parse(result), showText: true});
@@ -1426,13 +1445,13 @@ export default class App extends React.Component {
 	
 	// sets the given setting to the given value
 	// note this could cause loss of data if multiple setStates are stacked, but that's almost impossible for our application
-	setSetting(name, value, whichSetting){
+	setSetting(name, value, whichSetting, callback){
 		this.setState({
 			[whichSetting]: {
 				...this.state[whichSetting],
 				[name]: value
 			}
-		});
+		}, callback);
 	}
 	
 	
@@ -1774,9 +1793,7 @@ export default class App extends React.Component {
 			//go back in modal
 			this.setState({customizePage: "classes", newTrait: {}, modifyingTrait: -1, customTraits: traitsClone}, () => {
 				// after state has been set, go through all dependents and update them
-				console.log('hello?')
 				for (let clas of this.getDependents(preserveId)) {
-					console.log('test')
 					this.updateClassBase(clas)
 				}
 			})
@@ -1861,7 +1878,8 @@ export default class App extends React.Component {
 			Stat_Requirements,
 			ability: trait.ability,
 			id: trait.id,
-			base: trait.base
+			base: trait.base,
+			hp: trait.hp,
 		}
 	}
 
@@ -1944,11 +1962,9 @@ export default class App extends React.Component {
 		// rebuild it, updating the base (new or not) in the proces
 		let updatedClass = this.getNewClass(classBlueprint)
 		// save the class in-place in our classes array
-				console.log('trying')
 		for (let index in this.state.customTraits.classes) {
 			let clas = this.state.customTraits.classes[index]
 			if (clas.id == updatedClass.id) {
-				console.log('saved')
 				// yes this is the improper way to set state, but its ok here since nothing in the UI needs updating in response to this (because our sub-menus don't render until they're clicked)
 				this.state.customTraits.classes[index] = updatedClass
 			}
@@ -2059,7 +2075,106 @@ export default class App extends React.Component {
 			armor: item.armor,
 			base: item.base,
 			id: item.id,
+			hp: item.hp,
 		}
+	}
+
+	setClassDefaults (baseId) {
+		let baseClass = this.getAllClasses().find(x => x.Properties[0] == baseId)
+		console.log(baseClass)
+		let trait = {...this.state.newTrait}
+		if (!trait.hp) {
+			if (baseClass.hp) trait.hp = baseClass.hp
+			else {
+				if (baseClass.Properties.includes("wizard")) trait.hp = "d6"
+				if (baseClass.Properties.includes("sorcerer")) trait.hp = "d6"
+				if (baseClass.Properties.includes("bard")) trait.hp = "d8"
+				if (baseClass.Properties.includes("cleric")) trait.hp = "d8"
+				if (baseClass.Properties.includes("druid")) trait.hp = "d8"
+				if (baseClass.Properties.includes("warlock")) trait.hp = "d8"
+				if (baseClass.Properties.includes("monk")) trait.hp = "d8"
+				if (baseClass.Properties.includes("artificer")) trait.hp = "d8"
+				if (baseClass.Properties.includes("rogue")) trait.hp = "d8"
+				if (baseClass.Properties.includes("ranger")) trait.hp = "d10"
+				if (baseClass.Properties.includes("fighter")) trait.hp = "d10"
+				if (baseClass.Properties.includes("paladin")) trait.hp = "d10"
+				if (baseClass.Properties.includes("barbarian")) trait.hp = "d12"
+			}
+		}
+		if (!trait.armor) {
+			if (baseClass.armor) trait.armor = baseClass.armor
+			else {
+				if (baseClass.Properties.includes("wizard")) trait.armor = "none"
+				if (baseClass.Properties.includes("sorcerer")) trait.armor = "none"
+				if (baseClass.Properties.includes("bard")) trait.armor = "light"
+				if (baseClass.Properties.includes("cleric")) trait.armor = "heavy"
+				if (baseClass.Properties.includes("druid")) trait.armor = "light"
+				if (baseClass.Properties.includes("warlock")) trait.armor = "light"
+				if (baseClass.Properties.includes("monk")) trait.armor = "none"
+				if (baseClass.Properties.includes("artificer")) trait.armor = "light"
+				if (baseClass.Properties.includes("rogue")) trait.armor = "light"
+				if (baseClass.Properties.includes("ranger")) trait.armor = "light"
+				if (baseClass.Properties.includes("fighter")) trait.armor = "medium"
+				if (baseClass.Properties.includes("paladin")) trait.armor = "medium"
+				if (baseClass.Properties.includes("barbarian")) trait.armor = "none"
+			}
+		}
+		if (!trait.weapon) {
+			if (baseClass.weapon) trait.weapon = baseClass.weapon
+			else {
+				if (baseClass.Properties.includes("wizard")) trait.weapon = "magic"
+				if (baseClass.Properties.includes("sorcerer")) trait.weapon = "magic"
+				if (baseClass.Properties.includes("bard")) trait.weapon = "instrument"
+				if (baseClass.Properties.includes("cleric")) trait.weapon = "one-melee"
+				if (baseClass.Properties.includes("druid")) trait.weapon = "bows"
+				if (baseClass.Properties.includes("warlock")) trait.weapon = "one-melee"
+				if (baseClass.Properties.includes("monk")) trait.weapon = "none"
+				if (baseClass.Properties.includes("artificer")) trait.weapon = "magic"
+				if (baseClass.Properties.includes("rogue")) trait.weapon = "finesse-melee"
+				if (baseClass.Properties.includes("ranger")) trait.weapon = "bows"
+				if (baseClass.Properties.includes("fighter")) trait.weapon = "two-melee"
+				if (baseClass.Properties.includes("paladin")) trait.weapon = "two-melee"
+				if (baseClass.Properties.includes("barbarian")) trait.weapon = "two-melee"
+			}
+		}
+		if (!trait.primaryStat) {
+			if (baseClass.weapon) trait.primaryStat = baseClass.primaryStat
+			else {
+				if (baseClass.Properties.includes("wizard")) trait.primaryStat = "I"
+				if (baseClass.Properties.includes("sorcerer")) trait.primaryStat = "C"
+				if (baseClass.Properties.includes("bard")) trait.primaryStat = "C"
+				if (baseClass.Properties.includes("cleric")) trait.primaryStat = "W"
+				if (baseClass.Properties.includes("druid")) trait.primaryStat = "W"
+				if (baseClass.Properties.includes("warlock")) trait.primaryStat = "C"
+				if (baseClass.Properties.includes("monk")) trait.primaryStat = "D"
+				if (baseClass.Properties.includes("artificer")) trait.primaryStat = "I"
+				if (baseClass.Properties.includes("rogue")) trait.primaryStat = "D"
+				if (baseClass.Properties.includes("ranger")) trait.primaryStat = "D"
+				if (baseClass.Properties.includes("fighter")) trait.primaryStat = "S"
+				if (baseClass.Properties.includes("paladin")) trait.primaryStat = "S"
+				if (baseClass.Properties.includes("barbarian")) trait.primaryStat = "S"
+			}
+		}
+		if (!trait.secondaryStat) {
+			if (baseClass.weapon) trait.secondaryStat = baseClass.secondaryStat
+			else {
+				if (baseClass.Properties.includes("wizard")) trait.secondaryStat = "W"
+				if (baseClass.Properties.includes("sorcerer")) trait.secondaryStat = "I"
+				if (baseClass.Properties.includes("bard")) trait.secondaryStat = "D"
+				if (baseClass.Properties.includes("cleric")) trait.secondaryStat = "S"
+				if (baseClass.Properties.includes("druid")) trait.secondaryStat = "C"
+				if (baseClass.Properties.includes("warlock")) trait.secondaryStat = "S"
+				if (baseClass.Properties.includes("monk")) trait.secondaryStat = "W"
+				if (baseClass.Properties.includes("artificer")) trait.secondaryStat = "D"
+				if (baseClass.Properties.includes("rogue")) trait.secondaryStat = "I"
+				if (baseClass.Properties.includes("ranger")) trait.secondaryStat = "W"
+				if (baseClass.Properties.includes("fighter")) trait.secondaryStat = "E"
+				if (baseClass.Properties.includes("paladin")) trait.secondaryStat = "C"
+				if (baseClass.Properties.includes("barbarian")) trait.secondaryStat = "E"
+			}
+		}
+		console.log(trait)
+		this.setState({newTrait: trait})
 	}
 
 	getAllClasses () {
