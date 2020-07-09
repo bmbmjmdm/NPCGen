@@ -1545,7 +1545,7 @@ export default class App extends React.Component {
 					}
 					else if (clas.base) {
 						// newbase doesnt rely on id, but it does rely on another class. does that class rely on id?
-						if (this.checkCircDepRecursive(id, clas.id)) {
+						if (this.checkCircDepRecursive(id, clas.base)) {
 							// yup, newBase is indirectly based on id
 							return true
 						}
@@ -1591,8 +1591,8 @@ export default class App extends React.Component {
 			this.state.customTraits.personalities.unshift({
 				Reroll: 0,
 				Description: this.state.newTrait.Name,
-				Properties: [id+""],
-				Incompatible: [id+""],
+				Properties: [id],
+				Incompatible: [id],
 				Name: this.state.newTrait.Name,
 				id,
 			})
@@ -1618,8 +1618,8 @@ export default class App extends React.Component {
 			this.state.customTraits.appearences.unshift({
 				Reroll: 0,
 				Description: this.state.newTrait.Name,
-				Properties: [id+""],
-				Incompatible: [id+""],
+				Properties: [id],
+				Incompatible: [id],
 				Name: this.state.newTrait.Name,
 				id,
 			})
@@ -1666,8 +1666,8 @@ export default class App extends React.Component {
 			this.state.customTraits.abilities.unshift({
 				Reroll: 0,
 				Description: description,
-				Properties: [id+""],
-				Incompatible: [id+""],
+				Properties: [id],
+				Incompatible: [id],
 				Name: this.state.newTrait.Name,
 				Requirements: requirements,
 				id,
@@ -1736,7 +1736,7 @@ export default class App extends React.Component {
 				Reroll: 0,
 				Abilities,
 				Name: this.state.newTrait.Name,
-				Properties: [id + ""],
+				Properties: [id],
 				primaryStat: this.state.newTrait.primaryStat,
 				secondaryStat: this.state.newTrait.secondaryStat,
 				Stats,
@@ -1765,14 +1765,18 @@ export default class App extends React.Component {
 				// add new id
 				this.state.newTrait.id = id
 			}
-			this.state.customTraits.classes.unshift(getNewClass(this.state.newTrait))
+			this.state.customTraits.classes.unshift(this.getNewClass(this.state.newTrait))
 			let traitsClone = {
 				...this.state.customTraits
 			}
+			// this will get erased by setState so we need to preserve it for updating dependencies
+			let preserveId = this.state.newTrait.id
 			//go back in modal
 			this.setState({customizePage: "classes", newTrait: {}, modifyingTrait: -1, customTraits: traitsClone}, () => {
 				// after state has been set, go through all dependents and update them
-				for (let clas of this.getDependents(this.newTrait.id)) {
+				console.log('hello?')
+				for (let clas of this.getDependents(preserveId)) {
+					console.log('test')
 					this.updateClassBase(clas)
 				}
 			})
@@ -1782,8 +1786,8 @@ export default class App extends React.Component {
 	// creates a new class given the trait blueprint. similar to other traits in saveTrait but we reuse this code for updating class dependencies
 	getNewClass (trait) {
 		let Stat_Requirements = {
-			[trait.primaryStat]: 14,
 			[trait.secondaryStat]: 12,
+			[trait.primaryStat]: 14,
 		}
 		// we use additional abilities instead of abilities because we want all listed, not just 1
 		let AdditionalAbilities = []
@@ -1834,9 +1838,9 @@ export default class App extends React.Component {
 		let props = []
 		let Abilities = []
 		if (trait.base) {
-			props = [trait.base]
-			let basedClass = this.getAllClasses().find(x => x.Properties[0] === trait.base)
-			Abilities = basedClass.Abilities
+			let basedClass = this.getAllClasses().find(x => x.Properties[0] == trait.base)
+			Abilities = [...basedClass.Abilities]
+			props = [...basedClass.Properties]
 			if (basedClass.AdditionalAbilities) {
 				AdditionalAbilities = AdditionalAbilities.concat(basedClass.AdditionalAbilities)
 			}
@@ -1847,7 +1851,7 @@ export default class App extends React.Component {
 			Abilities,
 			AdditionalAbilities,
 			Name: trait.Name,
-			Properties: [id + "", ...props],
+			Properties: [trait.id, ...props],
 			primaryStat: trait.primaryStat,
 			secondaryStat: trait.secondaryStat,
 			weapon: trait.weapon,
@@ -1885,7 +1889,7 @@ export default class App extends React.Component {
 		}
 		if (this.state.customizePage === "editRace") {
 			// clear this race on the settings screen if its selected
-			let id = this.newTrait.id
+			let id = this.state.newTrait.id
 			if (this.state.settingsNew.Race === id) {
 				this.state.settingsNew.Race = "Any"
 			}
@@ -1894,7 +1898,7 @@ export default class App extends React.Component {
 		}
 		if (this.state.customizePage === "editClass") {
 			// clear this class on the settings screen if its selected
-			let id = this.newTrait.id
+			let id = this.state.newTrait.id
 			if (this.state.settingsNew.Class === id) {
 				this.state.settingsNew.Class = "Any"
 			}
@@ -1910,7 +1914,7 @@ export default class App extends React.Component {
 
 	tryToDeleteClass () {
 		// no dependents, go ahead
-		let dependents = this.getDependents(this.newTrait.id)
+		let dependents = this.getDependents(this.state.newTrait.id)
 		if (dependents.length === 0) return true
 		else {
 			Alert.alert(
@@ -1936,13 +1940,15 @@ export default class App extends React.Component {
 	updateClassBase (clas, newBase) {
 		// strip the class down so we can rebuild its
 		let classBlueprint = this.getClassAsNewTrait(clas)
-		if (newBase !== undefined) clasBlueprint.base = newBase
+		if (newBase !== undefined) classBlueprint.base = newBase
 		// rebuild it, updating the base (new or not) in the proces
 		let updatedClass = this.getNewClass(classBlueprint)
 		// save the class in-place in our classes array
+				console.log('trying')
 		for (let index in this.state.customTraits.classes) {
 			let clas = this.state.customTraits.classes[index]
 			if (clas.id == updatedClass.id) {
+				console.log('saved')
 				// yes this is the improper way to set state, but its ok here since nothing in the UI needs updating in response to this (because our sub-menus don't render until they're clicked)
 				this.state.customTraits.classes[index] = updatedClass
 			}
