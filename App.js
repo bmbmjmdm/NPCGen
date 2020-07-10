@@ -119,12 +119,18 @@ export default class App extends React.Component {
 									<Picker.Item label="Tiefling" value="tiefling" />
 								</Picker>
 							</View>
-
+						
 							<View style={this.styles.modalSettingContainer}>
-								<Text style={this.styles.modalSettingLabel}>Use Custom Traits</Text>
-								<TouchableOpacity onPress={() => this.setSetting("useCustomTraits", !this.state[this.state.settingsPage].useCustomTraits, this.state.settingsPage)} activeOpacity={0.5}>
-									<Image style={this.styles.modalSettingCheckbox} source={this.getCheckbox(this.state[this.state.settingsPage].useCustomTraits)}></Image>
-								</TouchableOpacity>
+								<Text style={this.styles.modalSettingLabel}>User{"\n"}Content</Text>
+								<Picker
+									selectedValue={this.state[this.state.settingsPage].customRate}
+									style={this.styles.modalSettingPicker}
+									onValueChange={(itemValue, itemIndex) => this.setSetting("customRate", itemValue, this.state.settingsPage)}
+									mode="dropdown" >
+									<Picker.Item label="Not included" value="none" />
+									<Picker.Item label="Normal rate" value="normal" />
+									<Picker.Item label="Frequently appears" value="frequent" />
+								</Picker>
 							</View>
 							
 							<View style={this.styles.modalSettingContainer}>
@@ -203,42 +209,12 @@ export default class App extends React.Component {
 						<ScrollView style={this.styles.modalScroll}>
 							<TouchableOpacity
 								activeOpacity={0.5}
-								onPress={() => this.setState({customizePage: 'personalities'})}>
+								onPress={() => this.setState({customizePage: 'classes'})}>
 								<ImageBackground
 									source={require('./src/eye.png')}
 									imageStyle={this.styles.modalImage}
 									style={this.styles.eyeButton}>
-										<Text style={this.styles.modalSettingLabel}>Personalities</Text>
-								</ImageBackground>
-							</TouchableOpacity>
-							<TouchableOpacity
-								activeOpacity={0.5}
-								onPress={() => this.setState({customizePage: 'appearences'})}>
-								<ImageBackground
-									source={require('./src/eye.png')}
-									imageStyle={this.styles.modalImage}
-									style={this.styles.eyeButton}>
-										<Text style={this.styles.modalSettingLabel}>Appearences</Text>
-								</ImageBackground>
-							</TouchableOpacity>
-							<TouchableOpacity
-								activeOpacity={0.5}
-								onPress={() => this.setState({customizePage: 'equipment'})}>
-								<ImageBackground
-									source={require('./src/eye.png')}
-									imageStyle={this.styles.modalImage}
-									style={this.styles.eyeButton}>
-										<Text style={this.styles.modalSettingLabel}>Equipment</Text>
-								</ImageBackground>
-							</TouchableOpacity>
-							<TouchableOpacity
-								activeOpacity={0.5}
-								onPress={() => this.setState({customizePage: 'accents'})}>
-								<ImageBackground
-									source={require('./src/eye.png')}
-									imageStyle={this.styles.modalImage}
-									style={this.styles.eyeButton}>
-										<Text style={this.styles.modalSettingLabel}>Accents</Text>
+										<Text style={this.styles.modalSettingLabel}>Classes</Text>
 								</ImageBackground>
 							</TouchableOpacity>
 							<TouchableOpacity
@@ -263,12 +239,42 @@ export default class App extends React.Component {
 							</TouchableOpacity>
 							<TouchableOpacity
 								activeOpacity={0.5}
-								onPress={() => this.setState({customizePage: 'classes'})}>
+								onPress={() => this.setState({customizePage: 'equipment'})}>
 								<ImageBackground
 									source={require('./src/eye.png')}
 									imageStyle={this.styles.modalImage}
 									style={this.styles.eyeButton}>
-										<Text style={this.styles.modalSettingLabel}>Classes</Text>
+										<Text style={this.styles.modalSettingLabel}>Equipment</Text>
+								</ImageBackground>
+							</TouchableOpacity>
+							<TouchableOpacity
+								activeOpacity={0.5}
+								onPress={() => this.setState({customizePage: 'appearences'})}>
+								<ImageBackground
+									source={require('./src/eye.png')}
+									imageStyle={this.styles.modalImage}
+									style={this.styles.eyeButton}>
+										<Text style={this.styles.modalSettingLabel}>Appearences</Text>
+								</ImageBackground>
+							</TouchableOpacity>
+							<TouchableOpacity
+								activeOpacity={0.5}
+								onPress={() => this.setState({customizePage: 'personalities'})}>
+								<ImageBackground
+									source={require('./src/eye.png')}
+									imageStyle={this.styles.modalImage}
+									style={this.styles.eyeButton}>
+										<Text style={this.styles.modalSettingLabel}>Personalities</Text>
+								</ImageBackground>
+							</TouchableOpacity>
+							<TouchableOpacity
+								activeOpacity={0.5}
+								onPress={() => this.setState({customizePage: 'accents'})}>
+								<ImageBackground
+									source={require('./src/eye.png')}
+									imageStyle={this.styles.modalImage}
+									style={this.styles.eyeButton}>
+										<Text style={this.styles.modalSettingLabel}>Accents</Text>
 								</ImageBackground>
 							</TouchableOpacity>
 						</ScrollView>
@@ -1234,7 +1240,7 @@ export default class App extends React.Component {
 				Level: 0,
 				Personality: 2,
 				Appearance: 2,
-				useCustomTraits: true
+				customRate: 'normal'
 			},
 			settingsPlus: {
 				Class: "Any",
@@ -1243,7 +1249,7 @@ export default class App extends React.Component {
 				Level: 1,
 				Personality: 2,
 				Appearance: 2,
-				useCustomTraits: true
+				customRate: 'normal'
 			},
 			keyboardShowing: false,
 			keyboardHeight: 0
@@ -1292,20 +1298,8 @@ export default class App extends React.Component {
 			this.mutex.acquire().then(release=>{
 				if (this.state.messages.intro) this.setState({introStep: this.state.introStep + 1});
 				this.saveCharacter();
-				// default empty custom traits
-				let additionalTraits = {
-					personalities: [],
-					accents: [],
-					appearences: [], 
-					equipment: [],
-					abilities: [],
-					races: [],
-					classes: [],
-				}
-				// user enabled custom traits, fetch them
-				if (this.state[settingsPage].useCustomTraits) additionalTraits = this.state.customTraits
 				// generate given our options
-				var newChar = generator(this.state[settingsPage], additionalTraits);
+				var newChar = generator(this.state[settingsPage], this.state.customTraits);
 				var newArray = this.state.characters.concat(newChar);
 			
 				this.setState({
@@ -1770,7 +1764,7 @@ export default class App extends React.Component {
 		if (this.state.customizePage === "editClass") {
 			//validate
 			if (!this.state.newTrait.Name || !this.state.newTrait.primaryStat || !this.state.newTrait.secondaryStat
-				|| !this.state.newTrait.weapon || !this.state.newTrait.armor) {
+				|| !this.state.newTrait.weapon || !this.state.newTrait.armor || !this.state.newTrait.hp) {
 				this.setState({validate: true})
 				return
 			}
@@ -2107,15 +2101,15 @@ export default class App extends React.Component {
 				if (baseClass.Properties.includes("wizard")) trait.armor = "none"
 				if (baseClass.Properties.includes("sorcerer")) trait.armor = "none"
 				if (baseClass.Properties.includes("bard")) trait.armor = "light"
-				if (baseClass.Properties.includes("cleric")) trait.armor = "heavy"
+				if (baseClass.Properties.includes("cleric")) trait.armor = "medium"
 				if (baseClass.Properties.includes("druid")) trait.armor = "light"
 				if (baseClass.Properties.includes("warlock")) trait.armor = "light"
 				if (baseClass.Properties.includes("monk")) trait.armor = "none"
 				if (baseClass.Properties.includes("artificer")) trait.armor = "light"
 				if (baseClass.Properties.includes("rogue")) trait.armor = "light"
-				if (baseClass.Properties.includes("ranger")) trait.armor = "light"
-				if (baseClass.Properties.includes("fighter")) trait.armor = "medium"
-				if (baseClass.Properties.includes("paladin")) trait.armor = "medium"
+				if (baseClass.Properties.includes("ranger")) trait.armor = "medium"
+				if (baseClass.Properties.includes("fighter")) trait.armor = "heavy"
+				if (baseClass.Properties.includes("paladin")) trait.armor = "heavy"
 				if (baseClass.Properties.includes("barbarian")) trait.armor = "none"
 			}
 		}
@@ -2159,13 +2153,13 @@ export default class App extends React.Component {
 			if (baseClass.weapon) trait.secondaryStat = baseClass.secondaryStat
 			else {
 				if (baseClass.Properties.includes("wizard")) trait.secondaryStat = "W"
-				if (baseClass.Properties.includes("sorcerer")) trait.secondaryStat = "I"
+				if (baseClass.Properties.includes("sorcerer")) trait.secondaryStat = "E"
 				if (baseClass.Properties.includes("bard")) trait.secondaryStat = "D"
 				if (baseClass.Properties.includes("cleric")) trait.secondaryStat = "S"
-				if (baseClass.Properties.includes("druid")) trait.secondaryStat = "C"
+				if (baseClass.Properties.includes("druid")) trait.secondaryStat = "I"
 				if (baseClass.Properties.includes("warlock")) trait.secondaryStat = "S"
 				if (baseClass.Properties.includes("monk")) trait.secondaryStat = "W"
-				if (baseClass.Properties.includes("artificer")) trait.secondaryStat = "D"
+				if (baseClass.Properties.includes("artificer")) trait.secondaryStat = "E"
 				if (baseClass.Properties.includes("rogue")) trait.secondaryStat = "I"
 				if (baseClass.Properties.includes("ranger")) trait.secondaryStat = "W"
 				if (baseClass.Properties.includes("fighter")) trait.secondaryStat = "E"

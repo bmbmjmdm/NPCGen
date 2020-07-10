@@ -10,7 +10,7 @@ var races;
 logsOn = false;
 
 export default function generate(settings, custom){
-	setTraits(custom)
+	setTraits(settings, custom)
 	//create character sheet components
 	var charSheet = {};
 	charSheet.properties = [];
@@ -18,7 +18,7 @@ export default function generate(settings, custom){
 	charSheet.equipment = [];
 	charSheet.level = settings.Level;
 	//generate a random stat block 
-	charSheet.stats = getStats(settings);
+	charSheet.stats = getStats(settings, custom);
 	charSheet.file = "";
 
 	//this will cause a chain reaction for the rest of the "gets" 
@@ -27,15 +27,92 @@ export default function generate(settings, custom){
 	return charSheet.file;
 }
 
-function setTraits (custom) {
-	abilities = require('./Abilities.js').placeholder.concat(custom.abilities);  
-	accents = require('./Accent.js').placeholder.concat(custom.accents);  
-	appearances = require('./Appearance.js').placeholder.concat(custom.appearences);  
-	classes = require('./Class.js').placeholder.concat(custom.classes);  
-	equipment = require('./Equipment.js').placeholder.concat(custom.equipment);  
-	names = require('./Name.js').placeholder; 
-	personalities = require('./Personality.js').placeholder.concat(custom.personalities);  
-	races = require('./Race.js').placeholder.concat(custom.races);
+function setTraits (settings, custom) {
+	let defaultAbilities = require('./Abilities.js').placeholder
+	let defaultAccents = require('./Accent.js').placeholder
+	let defaultAppearences = require('./Appearance.js').placeholder
+	let defaultClasses = require('./Class.js').placeholder
+	let defaultEquipment = require('./Equipment.js').placeholder
+	let defaultNames = require('./Name.js').placeholder
+	let defaultPersonalities = require('./Personality.js').placeholder
+	let defaultRaces = require('./Race.js').placeholder
+
+
+	abilities = defaultAbilities
+	accents = defaultAccents
+	appearances = defaultAppearences
+	classes = defaultClasses
+	equipment = defaultEquipment
+	names = defaultNames
+	personalities = defaultPersonalities
+	races = defaultRaces
+
+	// add custom traits based on user's selected frequency
+	let frequency
+	switch (settings.customRate) {
+		case "none":
+			frequency = 0
+			break
+		case "normal":
+			frequency = 1
+			break
+		case "frequent":
+			frequency = -1
+			break
+	}
+	// normal and none cases
+	for (let i = 0; i < frequency; i++) {
+		abilities = abilities.concat(custom.abilities)
+		accents = accents.concat(custom.accents);  
+		appearances = appearances.concat(custom.appearences);  
+		classes = classes.concat(custom.classes);  
+		equipment = equipment.concat(custom.equipment);
+		personalities = personalities.concat(custom.personalities);  
+		races = races.concat(custom.races);
+	}
+
+	// frequent case
+	if (frequency == -1) {
+		// add custom traits so they take up a certain portion of the total traits
+		let getMultiplier = (customLength, defaultLength, repeatCap) => {
+			let dontdividebyzero = customLength < 1 ? -1 : customLength
+			// int needed to make them take up 26% of all traits (target is 50% but we dont accept floats below)
+			// TODO make this closer to 50%, suddenly dropping from 50 to 26 when the user adds a trait on the edge is bad UX 
+			let multiplier = (defaultLength - customLength) / dontdividebyzero
+			return Math.min(multiplier, repeatCap)
+		}
+		
+		let abilityMultiplier = getMultiplier(custom.abilities.length, defaultAbilities.length, 10)
+		let accentMultiplier = getMultiplier(custom.accents.length, defaultAccents.length, 7)
+		let appearenceMultiplier = getMultiplier(custom.appearences.length, defaultAppearences.length, 5)
+		let classMultiplier = getMultiplier(custom.classes.length, defaultClasses.length, 3)
+		let equipmentMultiplier = getMultiplier(custom.equipment.length, defaultEquipment.length, 10)
+		let personalityMultiplier = getMultiplier(custom.personalities.length, defaultPersonalities.length, 5)
+		let raceMultiplier = getMultiplier(custom.races.length, defaultRaces.length, 999)
+
+		for (let i = 0; i < abilityMultiplier ; i++) {
+			abilities = abilities.concat(custom.abilities)
+		}
+		for (let i = 0; i < accentMultiplier ; i++) {
+			accents = accents.concat(custom.accents);  
+		}
+		for (let i = 0; i < appearenceMultiplier ; i++) {
+			appearances = appearances.concat(custom.appearences);  
+		}
+		for (let i = 0; i < classMultiplier ; i++) {
+			classes = classes.concat(custom.classes);
+		}
+		for (let i = 0; i < equipmentMultiplier ; i++) {
+			equipment = equipment.concat(custom.equipment);
+		}
+		for (let i = 0; i < personalityMultiplier ; i++) {
+			personalities = personalities.concat(custom.personalities);  
+		}
+		for (let i = 0; i < raceMultiplier ; i++) {
+			races = races.concat(custom.races);
+		}
+	}
+
 }
 
 
@@ -168,7 +245,7 @@ function capitalizeFirstLetter(string) {
 
 
 //==================== get a random stat block =======================
-function getStats(settings){
+function getStats(settings, custom){
 	//set all stats to 0
 	var stats = {"S": 0, "C": 0, "D": 0, "W":0, "E": 0, "I": 0, "AC":0};
 	
@@ -257,14 +334,22 @@ function getStats(settings){
 			return retMe && retMe2;
 		}
 		
-		//we also have to test that they pass the selected class's stats if the user set one 
+		//we also have to test that they pass the selected class's stats if the user set one, or for a custom class if user wants frequent custom traits
 		var hasClassStats = function() {
-			if(settings.Class == 'Any') return true;
-			else{
+			// user selected a class
+			if(settings.Class != 'Any') {
 				var classReq = lookupClass(settings.Class);
 				
 				return passedStats(stats, classReq.Stat_Requirements);
 			}
+			// user prefers a custom class
+			if (settings.customRate == "frequent") {
+				for (let clas of custom.classes) {
+					if (passedStats(stats, clas.Stat_Requirements)) return true
+				}
+				return false
+			} 
+			return true
 		}
 	
 		while(!hasHighStats() || !hasClassStats()){
