@@ -77,12 +77,11 @@ function setTraits (settings, custom) {
 		let getMultiplier = (customLength, defaultLength, repeatCap) => {
 			let dontdividebyzero = customLength < 1 ? -1 : customLength
 			// int needed to make them take up 26% of all traits (target is 50% but we dont accept floats below)
-			// TODO make this closer to 50%, suddenly dropping from 50 to 26 when the user adds a trait on the edge is bad UX 
-			let multiplier = (defaultLength - customLength) / dontdividebyzero
+			let multiplier = Math.round((defaultLength - customLength) / dontdividebyzero)
 			return Math.min(multiplier, repeatCap)
 		}
 		
-		let abilityMultiplier = getMultiplier(custom.abilities.length, defaultAbilities.length, 10)
+		let abilityMultiplier = getMultiplier(custom.abilities.length, defaultAbilities.length, 6)
 		let accentMultiplier = getMultiplier(custom.accents.length, defaultAccents.length, 7)
 		let appearenceMultiplier = getMultiplier(custom.appearences.length, defaultAppearences.length, 5)
 		let classMultiplier = getMultiplier(custom.classes.length, defaultClasses.length, 3)
