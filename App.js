@@ -1042,7 +1042,7 @@ export default class App extends React.Component {
 						keyExtractor={this._keyCharacterShield}
 						renderItem={this._renderCharacterShield}
 						getItemLayout={this._getItemLayout}
-						windowSize={3}
+						windowSize={5}
 						ref={component => this._listScroll = component}
 						style={[this.styles.leftBar, this.state.introStep === 1 ? this.styles.overOverlay : {}]}
 					/>
