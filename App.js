@@ -1041,6 +1041,8 @@ export default class App extends React.Component {
 						extraData={this.state.index}
 						keyExtractor={this._keyCharacterShield}
 						renderItem={this._renderCharacterShield}
+						getItemLayout={this._getItemLayout}
+						windowSize={3}
 						ref={component => this._listScroll = component}
 						style={[this.styles.leftBar, this.state.introStep === 1 ? this.styles.overOverlay : {}]}
 					/>
@@ -1083,8 +1085,7 @@ export default class App extends React.Component {
 			<TouchableOpacity
 				onPress={() => this.showCharacter(index, true)}
 				style={this.styles.listButton}
-				shouldRasterizeIOS={true}
-				renderToHardwareTextureAndroid={true}>
+				shouldRasterizeIOS={true}>
 
 				<ImageBackground
 					source={crestSrc}
@@ -1103,6 +1104,10 @@ export default class App extends React.Component {
 		</FlatListItem>
 		);
 	}
+
+	_getItemLayout = (data, index) => (
+  		{length: 105, offset: 105 * index, index}
+	);
 	
 	//helper function for getting keys for character list
 	_keyCharacterShield = (item, index) => {
@@ -2075,7 +2080,6 @@ export default class App extends React.Component {
 
 	setClassDefaults (baseId) {
 		let baseClass = this.getAllClasses().find(x => x.Properties[0] == baseId)
-		console.log(baseClass)
 		let trait = {...this.state.newTrait}
 		if (!trait.hp) {
 			if (baseClass.hp) trait.hp = baseClass.hp
@@ -2167,7 +2171,6 @@ export default class App extends React.Component {
 				if (baseClass.Properties.includes("barbarian")) trait.secondaryStat = "E"
 			}
 		}
-		console.log(trait)
 		this.setState({newTrait: trait})
 	}
 
