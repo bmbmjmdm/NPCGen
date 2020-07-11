@@ -1,9 +1,11 @@
 import React from 'react';
-import {View, TextInput, ImageBackground, TouchableOpacity, Image, StyleSheet, ScrollView, Text, Keyboard, FlatList, AppState, AsyncStorage, Modal, Picker, Dimensions, Alert }  from 'react-native';
-import generator from './src/generator.js'
-import {Mutex, MutexInterface} from 'async-mutex'
+import {View, TextInput, ImageBackground, TouchableOpacity, Image, StyleSheet, ScrollView, Text, Keyboard, FlatList, AppState, AsyncStorage, Modal, Picker, Dimensions, Alert, PermissionsAndroid }  from 'react-native';
+import generator from './src/generator.js'	
+import {Mutex} from 'async-mutex'
 import MultiSelect from 'react-native-multiple-select';
 import uuid from 'react-native-uuid'
+import fs from 'react-native-fs'
+import DocumentPicker from 'react-native-document-picker';
 
 export default class App extends React.Component {
 	
@@ -275,6 +277,27 @@ export default class App extends React.Component {
 									imageStyle={this.styles.modalImage}
 									style={this.styles.eyeButton}>
 										<Text style={this.styles.modalSettingLabel}>Accents</Text>
+								</ImageBackground>
+							</TouchableOpacity>
+							<TouchableOpacity
+								style={{marginTop: 50}}
+								activeOpacity={0.5}
+								onPress={this.exportContent}>
+								<ImageBackground
+									source={require('./src/eye_red.png')}
+									imageStyle={this.styles.modalImage}
+									style={this.styles.eyeButton}>
+										<Text style={this.styles.modalSettingLabel}>Export Content</Text>
+								</ImageBackground>
+							</TouchableOpacity>
+							<TouchableOpacity
+								activeOpacity={0.5}
+								onPress={this.importContent}>
+								<ImageBackground
+									source={require('./src/eye_red.png')}
+									imageStyle={this.styles.modalImage}
+									style={this.styles.eyeButton}>
+										<Text style={this.styles.modalSettingLabel}>Import Content</Text>
 								</ImageBackground>
 							</TouchableOpacity>
 						</ScrollView>
@@ -1278,6 +1301,8 @@ export default class App extends React.Component {
 		this.getClassAsNewTrait = this.getClassAsNewTrait.bind(this)
 		this.getNewClass = this.getNewClass.bind(this)
 		this.setClassDefaults = this.setClassDefaults.bind(this)
+		this.exportContent = this.exportContent.bind(this)
+		this.importContent = this.importContent.bind(this)
 
 		AsyncStorage.getItem("characters", (error, result) => {
 			if(result && !error) this.setState({characters: JSON.parse(result), showText: true});
@@ -1301,7 +1326,10 @@ export default class App extends React.Component {
 	newCharacter(settingsPage) {
 		if(!this.mutex.isLocked()){
 			this.mutex.acquire().then(release=>{
-				if (this.state.messages.intro) this.setState({introStep: this.state.introStep + 1});
+				if (this.state.messages.intro) {
+					if (this.state.introStep == 0) this.setState({introStep: this.state.introStep + 1});
+					else return release()
+				}
 				this.saveCharacter();
 				// generate given our options
 				var newChar = generator(this.state[settingsPage], this.state.customTraits);
@@ -1327,7 +1355,10 @@ export default class App extends React.Component {
 	showCharacter(index, save) {
 		if(!this.mutex.isLocked()){
 			this.mutex.acquire().then(release=>{
-				if (this.state.messages.intro && this.state.introStep === 1) this.setState({introStep: this.state.introStep + 1});
+				if (this.state.messages.intro) {
+					if (this.state.introStep === 1) this.setState({introStep: this.state.introStep + 1});
+					else return release()
+				}
 				if(save){
 					this.saveCharacter();
 				}
@@ -1353,7 +1384,8 @@ export default class App extends React.Component {
 		if(!this.mutex.isLocked()){
 			this.mutex.acquire().then(release=>{
 				if (this.state.messages.intro)  {
-					this.setState({introStep: this.state.introStep + 1});
+					if (this.state.introStep == 2) this.setState({introStep: this.state.introStep + 1});
+					else return release()
 					if (this.state.characters.length > 1) return release()
 				}
 				// do nothing if list is empty
@@ -1425,7 +1457,7 @@ export default class App extends React.Component {
 	// displys the settings modal when the user clicks the gear icon
 	showSettings(show) {
 		if (this.state.messages.intro) {
-			this.setState({introStep: this.state.introStep + 1});
+			if (this.state.introStep == 3) this.setState({introStep: this.state.introStep + 1});
 			return
 		}
 		this.setState({settingsVisible: show});
@@ -1435,7 +1467,7 @@ export default class App extends React.Component {
 	// displys the settings modal when the user clicks the gear icon
 	showCustomize(show) {
 		if (this.state.messages.intro) {
-			this.setState({messages: {...this.state.messages, intro: false}});
+			if (this.state.introStep == 4) this.setState({messages: {...this.state.messages, intro: false}});
 			return
 		}
 		this.setState({customizeVisible: show});
@@ -2186,6 +2218,105 @@ export default class App extends React.Component {
 		if (this.state.introStep === 2) return "Click here to delete the currently selected NPC"
 		if (this.state.introStep === 3) return "Clicking here allows you to adjust new NPC settings."
 		if (this.state.introStep === 4) return "Clicking here allows you to add your own content! Create classes, personalities, equipment, etc which will be used when generating new NPCs!"
+	}
+
+	async exportContent () {
+		try {
+			const granted = await PermissionsAndroid.request(
+				PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE
+			);
+			if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+				const dir = fs.DownloadDirectoryPath; // TODO make this usable for ios https://github.com/itinance/react-native-fs
+				const NEW_FILE_PATH = dir + '/NPCG';
+				await fs.writeFile(NEW_FILE_PATH, JSON.stringify({characters: this.state.characters, customTraits: this.state.customTraits}));
+				Alert.alert(
+					"Success",
+					"All data exported to file 'NPCG' in your Downloads folder",
+					[
+						{ text: "OK", onPress: () => {}}
+					],
+					{ cancelable: true }
+				);
+
+			} else {
+				// permission denied
+			}
+		} 
+		catch (err) {
+			Alert.alert(
+				"Error",
+				"An error has occured: "+err,
+				[
+					{ text: "OK", onPress: () => {}}
+				],
+				{ cancelable: true }
+			);
+		}
+	}
+
+	async importContent () {
+		try {
+			const res = await DocumentPicker.pick({ type: [DocumentPicker.types.allFiles] })
+			let contents = JSON.parse(await fs.readFile(res.uri, 'utf8'))
+			let dupObj = {duplicates: false}
+			let characters = this.concatWithoutDuplicates(this.state.characters, contents.characters, dupObj)
+			let customTraits = {
+				personalities: this.concatWithoutDuplicates(this.state.customTraits.personalities, contents.customTraits.personalities, dupObj),
+				accents: this.concatWithoutDuplicates(this.state.customTraits.accents, contents.customTraits.accents, dupObj),
+				appearences: this.concatWithoutDuplicates(this.state.customTraits.appearences, contents.customTraits.appearences, dupObj),
+				equipment: this.concatWithoutDuplicates(this.state.customTraits.equipment, contents.customTraits.equipment, dupObj),
+				abilities: this.concatWithoutDuplicates(this.state.customTraits.abilities, contents.customTraits.abilities, dupObj),
+				races: this.concatWithoutDuplicates(this.state.customTraits.races, contents.customTraits.races, dupObj),
+				classes: this.concatWithoutDuplicates(this.state.customTraits.classes, contents.customTraits.classes, dupObj),
+			}
+			this.setState({characters, customTraits, showText: true})
+			Alert.alert(
+				dupObj.duplicates ? "Warning" : "Success",
+				dupObj.duplicates ? 
+					"Content imported successfully, however duplicate content was detected. Duplicates were not be imported." :
+					"Content imported successfully!",
+				[
+					{ text: "OK", onPress: () => {}}
+				],
+				{ cancelable: true }
+			);
+		} 
+		catch (err) {
+			if (!DocumentPicker.isCancel(err)) {
+				Alert.alert(
+					"Error",
+					"An error has occured: "+err,
+					[
+						{ text: "OK", onPress: () => {}}
+					],
+					{ cancelable: true }
+				);
+			}
+	  	}
+	}
+
+	concatWithoutDuplicates (list, newList, dupObj) {
+		for (let newItem of newList) {
+			let isDuplicate = false
+			for (let item of list) {
+				// see if any items have the same id
+				if (item.id) {
+					if (newItem.id == item.id) {
+						dupObj.duplicates = true
+						isDuplicate = true
+					}
+				}
+				// if they dont use ids, just check if theyre the same (both are a string)
+				else {
+					if (newItem == item) {
+						dupObj.duplicates = true
+						isDuplicate = true
+					}
+				}
+			}
+			if (!isDuplicate) list.push(newItem)
+		}
+		return list
 	}
 	
 	
