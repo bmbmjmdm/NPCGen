@@ -75,22 +75,42 @@ function setTraits (settings, custom) {
 	if (frequency == -1) {
 		// add custom traits so they take up a certain portion of the total traits
 		let getMultiplier = (customLength, defaultLength, repeatCap) => {
+			// replaces customLength with -1 if its 0
 			let dontdividebyzero = customLength < 1 ? -1 : customLength
-			// int needed to make them take up 26% of all traits (target is 50% but we dont accept floats below)
-			let multiplier = Math.round((defaultLength - customLength) / dontdividebyzero)
-			return Math.min(multiplier, repeatCap)
+			// int needed to make them take up around 50% of all traits
+			// this is the number of times the entire list of custom traits is added to the default ones, customLength * multiplier = defaultLength
+			let multiplier = Math.round(defaultLength / dontdividebyzero)
+			// multiplier is no lower than 1 and no higher than repeat cap
+			return Math.max(Math.min(multiplier, repeatCap), 1)
 		}
 		
-		let abilityMultiplier = getMultiplier(custom.abilities.length, defaultAbilities.length, 6)
+		// split abilities into those that require a class and those that dont
+		let customAbilitiesClasses = []
+		let customAbilitiesAll = []
+		for (let ab of custom.abilities) {
+			if (ab.Requirements && ab.Requirements.Properties) {
+				if (ab.Requirements.Properties.length) customAbilitiesClasses.push(ab)
+				else customAbilitiesAll.push(ab)
+			}
+			// this shouldnt be possible
+			else {}
+		}
+		// these maxes are based on the pool they're being added to's size as well as how often the user would want them to show up if they only added one or two
+		let abilityClassesMultiplier = getMultiplier(customAbilitiesClasses.length, defaultAbilities.length, 6)
 		let accentMultiplier = getMultiplier(custom.accents.length, defaultAccents.length, 7)
 		let appearenceMultiplier = getMultiplier(custom.appearences.length, defaultAppearences.length, 5)
 		let classMultiplier = getMultiplier(custom.classes.length, defaultClasses.length, 3)
 		let equipmentMultiplier = getMultiplier(custom.equipment.length, defaultEquipment.length, 10)
-		let personalityMultiplier = getMultiplier(custom.personalities.length, defaultPersonalities.length, 5)
-		let raceMultiplier = getMultiplier(custom.races.length, defaultRaces.length, 999)
+		let personalityMultiplier = getMultiplier(custom.personalities.length, defaultPersonalities.length, 4)
+		let raceMultiplier = getMultiplier(custom.races.length, defaultRaces.length, 4)
+		// abilities that dont require a class deal with a much smaller ability list, so set the list length to just roughly those
+		let abilityAllMultiplier = getMultiplier(customAbilitiesAll.length, 15, 4)
 
-		for (let i = 0; i < abilityMultiplier ; i++) {
-			abilities = abilities.concat(custom.abilities)
+		for (let i = 0; i < abilityClassesMultiplier ; i++) {
+			abilities = abilities.concat(customAbilitiesClasses)
+		}
+		for (let i = 0; i < abilityAllMultiplier ; i++) {
+			abilities = abilities.concat(customAbilitiesAll)
 		}
 		for (let i = 0; i < accentMultiplier ; i++) {
 			accents = accents.concat(custom.accents);  
@@ -210,7 +230,7 @@ function equipmentRequirements(charSheet, reqs){
 			return false;
 		}
 	}
-	if(reqs.Properties){
+	if(reqs.Properties && reqs.Properties.length){
 		var bool = containsAny(charSheet.properties, reqs.Properties);
 		if(!bool){
 			return false;
@@ -343,6 +363,7 @@ function getStats(settings, custom){
 			}
 			// user prefers a custom class
 			if (settings.customRate == "frequent") {
+				if (!custom.classes.length) return true
 				for (let clas of custom.classes) {
 					if (passedStats(stats, clas.Stat_Requirements)) return true
 				}

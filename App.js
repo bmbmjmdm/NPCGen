@@ -2258,6 +2258,7 @@ export default class App extends React.Component {
 		try {
 			const res = await DocumentPicker.pick({ type: [DocumentPicker.types.allFiles] })
 			let contents = JSON.parse(await fs.readFile(res.uri, 'utf8'))
+			if (!contents || !contents.characters || !contents.customTraits) throw new Error("")
 			let dupObj = {duplicates: false}
 			let characters = this.concatWithoutDuplicates(this.state.characters, contents.characters, dupObj)
 			let customTraits = {
@@ -2285,7 +2286,7 @@ export default class App extends React.Component {
 			if (!DocumentPicker.isCancel(err)) {
 				Alert.alert(
 					"Error",
-					"An error has occured: "+err,
+					"Invalid file. Please select an 'NPCG' file exported by this app.",
 					[
 						{ text: "OK", onPress: () => {}}
 					],
