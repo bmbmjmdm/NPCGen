@@ -2110,98 +2110,89 @@ export default class App extends React.Component {
 		}
 	}
 
+	// if user changes the base of a class, set the defaults for all their attributes
 	setClassDefaults (baseId) {
 		let baseClass = this.getAllClasses().find(x => x.Properties[0] == baseId)
 		let trait = {...this.state.newTrait}
-		if (!trait.hp) {
-			if (baseClass.hp) trait.hp = baseClass.hp
-			else {
-				if (baseClass.Properties.includes("wizard")) trait.hp = "d6"
-				if (baseClass.Properties.includes("sorcerer")) trait.hp = "d6"
-				if (baseClass.Properties.includes("bard")) trait.hp = "d8"
-				if (baseClass.Properties.includes("cleric")) trait.hp = "d8"
-				if (baseClass.Properties.includes("druid")) trait.hp = "d8"
-				if (baseClass.Properties.includes("warlock")) trait.hp = "d8"
-				if (baseClass.Properties.includes("monk")) trait.hp = "d8"
-				if (baseClass.Properties.includes("artificer")) trait.hp = "d8"
-				if (baseClass.Properties.includes("rogue")) trait.hp = "d8"
-				if (baseClass.Properties.includes("ranger")) trait.hp = "d10"
-				if (baseClass.Properties.includes("fighter")) trait.hp = "d10"
-				if (baseClass.Properties.includes("paladin")) trait.hp = "d10"
-				if (baseClass.Properties.includes("barbarian")) trait.hp = "d12"
-			}
+		if (baseClass.hp) trait.hp = baseClass.hp
+		else {
+			if (baseClass.Properties.includes("wizard")) trait.hp = "d6"
+			if (baseClass.Properties.includes("sorcerer")) trait.hp = "d6"
+			if (baseClass.Properties.includes("bard")) trait.hp = "d8"
+			if (baseClass.Properties.includes("cleric")) trait.hp = "d8"
+			if (baseClass.Properties.includes("druid")) trait.hp = "d8"
+			if (baseClass.Properties.includes("warlock")) trait.hp = "d8"
+			if (baseClass.Properties.includes("monk")) trait.hp = "d8"
+			if (baseClass.Properties.includes("artificer")) trait.hp = "d8"
+			if (baseClass.Properties.includes("rogue")) trait.hp = "d8"
+			if (baseClass.Properties.includes("ranger")) trait.hp = "d10"
+			if (baseClass.Properties.includes("fighter")) trait.hp = "d10"
+			if (baseClass.Properties.includes("paladin")) trait.hp = "d10"
+			if (baseClass.Properties.includes("barbarian")) trait.hp = "d12"
 		}
-		if (!trait.armor) {
-			if (baseClass.armor) trait.armor = baseClass.armor
-			else {
-				if (baseClass.Properties.includes("wizard")) trait.armor = "none"
-				if (baseClass.Properties.includes("sorcerer")) trait.armor = "none"
-				if (baseClass.Properties.includes("bard")) trait.armor = "light"
-				if (baseClass.Properties.includes("cleric")) trait.armor = "medium"
-				if (baseClass.Properties.includes("druid")) trait.armor = "light"
-				if (baseClass.Properties.includes("warlock")) trait.armor = "light"
-				if (baseClass.Properties.includes("monk")) trait.armor = "none"
-				if (baseClass.Properties.includes("artificer")) trait.armor = "light"
-				if (baseClass.Properties.includes("rogue")) trait.armor = "light"
-				if (baseClass.Properties.includes("ranger")) trait.armor = "medium"
-				if (baseClass.Properties.includes("fighter")) trait.armor = "heavy"
-				if (baseClass.Properties.includes("paladin")) trait.armor = "heavy"
-				if (baseClass.Properties.includes("barbarian")) trait.armor = "none"
-			}
+		if (baseClass.armor) trait.armor = baseClass.armor
+		else {
+			if (baseClass.Properties.includes("wizard")) trait.armor = "none"
+			if (baseClass.Properties.includes("sorcerer")) trait.armor = "none"
+			if (baseClass.Properties.includes("bard")) trait.armor = "light"
+			if (baseClass.Properties.includes("cleric")) trait.armor = "medium"
+			if (baseClass.Properties.includes("druid")) trait.armor = "light"
+			if (baseClass.Properties.includes("warlock")) trait.armor = "light"
+			if (baseClass.Properties.includes("monk")) trait.armor = "none"
+			if (baseClass.Properties.includes("artificer")) trait.armor = "light"
+			if (baseClass.Properties.includes("rogue")) trait.armor = "light"
+			if (baseClass.Properties.includes("ranger")) trait.armor = "medium"
+			if (baseClass.Properties.includes("fighter")) trait.armor = "heavy"
+			if (baseClass.Properties.includes("paladin")) trait.armor = "heavy"
+			if (baseClass.Properties.includes("barbarian")) trait.armor = "none"
 		}
-		if (!trait.weapon) {
-			if (baseClass.weapon) trait.weapon = baseClass.weapon
-			else {
-				if (baseClass.Properties.includes("wizard")) trait.weapon = "magic"
-				if (baseClass.Properties.includes("sorcerer")) trait.weapon = "magic"
-				if (baseClass.Properties.includes("bard")) trait.weapon = "instrument"
-				if (baseClass.Properties.includes("cleric")) trait.weapon = "one-melee"
-				if (baseClass.Properties.includes("druid")) trait.weapon = "bows"
-				if (baseClass.Properties.includes("warlock")) trait.weapon = "one-melee"
-				if (baseClass.Properties.includes("monk")) trait.weapon = "none"
-				if (baseClass.Properties.includes("artificer")) trait.weapon = "magic"
-				if (baseClass.Properties.includes("rogue")) trait.weapon = "finesse-melee"
-				if (baseClass.Properties.includes("ranger")) trait.weapon = "bows"
-				if (baseClass.Properties.includes("fighter")) trait.weapon = "two-melee"
-				if (baseClass.Properties.includes("paladin")) trait.weapon = "two-melee"
-				if (baseClass.Properties.includes("barbarian")) trait.weapon = "two-melee"
-			}
+		if (baseClass.weapon) trait.weapon = baseClass.weapon
+		else {
+			if (baseClass.Properties.includes("wizard")) trait.weapon = "magic"
+			if (baseClass.Properties.includes("sorcerer")) trait.weapon = "magic"
+			if (baseClass.Properties.includes("bard")) trait.weapon = "instrument"
+			if (baseClass.Properties.includes("cleric")) trait.weapon = "one-melee"
+			if (baseClass.Properties.includes("druid")) trait.weapon = "bows"
+			if (baseClass.Properties.includes("warlock")) trait.weapon = "one-melee"
+			if (baseClass.Properties.includes("monk")) trait.weapon = "none"
+			if (baseClass.Properties.includes("artificer")) trait.weapon = "magic"
+			if (baseClass.Properties.includes("rogue")) trait.weapon = "finesse-melee"
+			if (baseClass.Properties.includes("ranger")) trait.weapon = "bows"
+			if (baseClass.Properties.includes("fighter")) trait.weapon = "two-melee"
+			if (baseClass.Properties.includes("paladin")) trait.weapon = "two-melee"
+			if (baseClass.Properties.includes("barbarian")) trait.weapon = "two-melee"
 		}
-		if (!trait.primaryStat) {
-			if (baseClass.weapon) trait.primaryStat = baseClass.primaryStat
-			else {
-				if (baseClass.Properties.includes("wizard")) trait.primaryStat = "I"
-				if (baseClass.Properties.includes("sorcerer")) trait.primaryStat = "C"
-				if (baseClass.Properties.includes("bard")) trait.primaryStat = "C"
-				if (baseClass.Properties.includes("cleric")) trait.primaryStat = "W"
-				if (baseClass.Properties.includes("druid")) trait.primaryStat = "W"
-				if (baseClass.Properties.includes("warlock")) trait.primaryStat = "C"
-				if (baseClass.Properties.includes("monk")) trait.primaryStat = "D"
-				if (baseClass.Properties.includes("artificer")) trait.primaryStat = "I"
-				if (baseClass.Properties.includes("rogue")) trait.primaryStat = "D"
-				if (baseClass.Properties.includes("ranger")) trait.primaryStat = "D"
-				if (baseClass.Properties.includes("fighter")) trait.primaryStat = "S"
-				if (baseClass.Properties.includes("paladin")) trait.primaryStat = "S"
-				if (baseClass.Properties.includes("barbarian")) trait.primaryStat = "S"
-			}
+		if (baseClass.weapon) trait.primaryStat = baseClass.primaryStat
+		else {
+			if (baseClass.Properties.includes("wizard")) trait.primaryStat = "I"
+			if (baseClass.Properties.includes("sorcerer")) trait.primaryStat = "C"
+			if (baseClass.Properties.includes("bard")) trait.primaryStat = "C"
+			if (baseClass.Properties.includes("cleric")) trait.primaryStat = "W"
+			if (baseClass.Properties.includes("druid")) trait.primaryStat = "W"
+			if (baseClass.Properties.includes("warlock")) trait.primaryStat = "C"
+			if (baseClass.Properties.includes("monk")) trait.primaryStat = "D"
+			if (baseClass.Properties.includes("artificer")) trait.primaryStat = "I"
+			if (baseClass.Properties.includes("rogue")) trait.primaryStat = "D"
+			if (baseClass.Properties.includes("ranger")) trait.primaryStat = "D"
+			if (baseClass.Properties.includes("fighter")) trait.primaryStat = "S"
+			if (baseClass.Properties.includes("paladin")) trait.primaryStat = "S"
+			if (baseClass.Properties.includes("barbarian")) trait.primaryStat = "S"
 		}
-		if (!trait.secondaryStat) {
-			if (baseClass.weapon) trait.secondaryStat = baseClass.secondaryStat
-			else {
-				if (baseClass.Properties.includes("wizard")) trait.secondaryStat = "W"
-				if (baseClass.Properties.includes("sorcerer")) trait.secondaryStat = "E"
-				if (baseClass.Properties.includes("bard")) trait.secondaryStat = "D"
-				if (baseClass.Properties.includes("cleric")) trait.secondaryStat = "S"
-				if (baseClass.Properties.includes("druid")) trait.secondaryStat = "I"
-				if (baseClass.Properties.includes("warlock")) trait.secondaryStat = "S"
-				if (baseClass.Properties.includes("monk")) trait.secondaryStat = "W"
-				if (baseClass.Properties.includes("artificer")) trait.secondaryStat = "E"
-				if (baseClass.Properties.includes("rogue")) trait.secondaryStat = "I"
-				if (baseClass.Properties.includes("ranger")) trait.secondaryStat = "W"
-				if (baseClass.Properties.includes("fighter")) trait.secondaryStat = "E"
-				if (baseClass.Properties.includes("paladin")) trait.secondaryStat = "C"
-				if (baseClass.Properties.includes("barbarian")) trait.secondaryStat = "E"
-			}
+		if (baseClass.weapon) trait.secondaryStat = baseClass.secondaryStat
+		else {
+			if (baseClass.Properties.includes("wizard")) trait.secondaryStat = "W"
+			if (baseClass.Properties.includes("sorcerer")) trait.secondaryStat = "E"
+			if (baseClass.Properties.includes("bard")) trait.secondaryStat = "D"
+			if (baseClass.Properties.includes("cleric")) trait.secondaryStat = "S"
+			if (baseClass.Properties.includes("druid")) trait.secondaryStat = "I"
+			if (baseClass.Properties.includes("warlock")) trait.secondaryStat = "S"
+			if (baseClass.Properties.includes("monk")) trait.secondaryStat = "W"
+			if (baseClass.Properties.includes("artificer")) trait.secondaryStat = "E"
+			if (baseClass.Properties.includes("rogue")) trait.secondaryStat = "I"
+			if (baseClass.Properties.includes("ranger")) trait.secondaryStat = "W"
+			if (baseClass.Properties.includes("fighter")) trait.secondaryStat = "E"
+			if (baseClass.Properties.includes("paladin")) trait.secondaryStat = "C"
+			if (baseClass.Properties.includes("barbarian")) trait.secondaryStat = "E"
 		}
 		this.setState({newTrait: trait})
 	}
