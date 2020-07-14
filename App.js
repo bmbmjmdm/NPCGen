@@ -2470,7 +2470,7 @@ export default class App extends React.Component {
 			marginLeft: -125,
 			top: '50%',
 			marginTop: -187.5,
-			position: 'absolute'
+			position: 'absolute',
 		},
 		
 		modalImage: {
@@ -2482,7 +2482,7 @@ export default class App extends React.Component {
 			marginBottom: 25,
 			marginTop: 27,
 			paddingLeft: 23,
-			paddingRight: 23
+			paddingRight: 23,
 		},
 		
 		modalSettingsNewPlus: {
@@ -2587,8 +2587,8 @@ export default class App extends React.Component {
 			width: 120,
 			margin: 0,
 			padding: 0,
-			marginTop: -7,
-			height: 40,
+			marginTop: -13,
+			height: 50,
 			color: '#ffffff',
 			transform: [
 				{ scaleX: 1.25 }, 
@@ -2600,8 +2600,8 @@ export default class App extends React.Component {
 			width: 100,
 			margin: 0,
 			padding: 0,
-			marginTop: -7,
-			height: 40,
+			marginTop: -13,
+			height: 50,
 			color: '#ffffff',
 			transform: [
 				{ scaleX: 1.25 }, 
@@ -2613,8 +2613,8 @@ export default class App extends React.Component {
 			width: 80,
 			margin: 0,
 			padding: 0,
-			marginTop: -7,
-			height: 40,
+			marginTop: -13,
+			height: 50,
 			color: '#ffffff',
 			transform: [
 				{ scaleX: 1.25 }, 
