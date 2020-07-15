@@ -327,6 +327,8 @@ export default class App extends React.Component {
 								renderItem={this._renderCustomTraits}
 								style={this.styles.existingTraits}
 								extraData={this.state.customTraits}
+								windowSize={5}
+								getItemLayout={this._getCustomItemLayout}
 							/>
 						</View>
 						}
@@ -390,6 +392,8 @@ export default class App extends React.Component {
 								renderItem={this._renderCustomTraits}
 								style={this.styles.existingTraits}
 								extraData={this.state.customTraits}
+								windowSize={5}
+								getItemLayout={this._getCustomItemLayout}
 							/>
 						</View>
 						}
@@ -454,6 +458,8 @@ export default class App extends React.Component {
 								renderItem={this._renderCustomTraits}
 								style={this.styles.existingTraits}
 								extraData={this.state.customTraits}
+								windowSize={5}
+								getItemLayout={this._getCustomItemLayout}
 							/>
 						</View>
 						}
@@ -517,6 +523,8 @@ export default class App extends React.Component {
 								renderItem={this._renderCustomTraits}
 								style={this.styles.existingTraits}
 								extraData={this.state.customTraits}
+								windowSize={5}
+								getItemLayout={this._getCustomItemLayout}
 							/>
 						</View>
 						}
@@ -620,6 +628,8 @@ export default class App extends React.Component {
 								renderItem={this._renderCustomTraits}
 								style={this.styles.existingTraits}
 								extraData={this.state.customTraits}
+								windowSize={5}
+								getItemLayout={this._getCustomItemLayout}
 							/>
 						</View>
 						}
@@ -722,6 +732,8 @@ export default class App extends React.Component {
 								renderItem={this._renderCustomTraits}
 								style={this.styles.existingTraits}
 								extraData={this.state.customTraits}
+								windowSize={5}
+								getItemLayout={this._getCustomItemLayout}
 							/>
 						</View>
 						}
@@ -834,6 +846,8 @@ export default class App extends React.Component {
 								renderItem={this._renderCustomTraits}
 								style={this.styles.existingTraits}
 								extraData={this.state.customTraits}
+								windowSize={5}
+								getItemLayout={this._getCustomItemLayout}
 							/>
 						</View>
 						}
@@ -1131,6 +1145,10 @@ export default class App extends React.Component {
 	_getItemLayout = (data, index) => (
   		{length: 105, offset: 105 * index, index}
 	);
+
+	_getCustomItemLayout = (data, index) => (
+  		{length: 70, offset: 70 * index, index}
+	);
 	
 	//helper function for getting keys for character list
 	_keyCharacterShield = (item, index) => {
@@ -1179,27 +1197,6 @@ export default class App extends React.Component {
 			return nameArr[0].trim().split(' ')[0].trim().slice(0, 10);
 		}
 	};
-	
-	
-	//helper function to underline "New" in modal
-	getSettingsNewImage(){
-		var img = require('./src/wordsNew.png');
-		if(this.state.settingsPage === "settingsNew"){
-			img = require('./src/wordsNewUnderline.png')
-		}
-		
-		return img;
-	}
-	
-	//helper function to underline "+" in modal
-	getSettingsPlusImage(){
-		var img = require('./src/words+.png');
-		if(this.state.settingsPage === "settingsPlus"){
-			img = require('./src/words+Underline.png')
-		}
-		
-		return img;
-	}
 	
 	//helper function to provide padding when keyboard is shown 
 	keyboardPadding(){
