@@ -1134,7 +1134,7 @@ export default class App extends React.Component {
 	
 	//helper function for getting keys for character list
 	_keyCharacterShield = (item, index) => {
-		return this.hashCode(item)+"";
+		return item;
 	}
 
 	//helper function for rendering list of custom traits
@@ -1159,21 +1159,10 @@ export default class App extends React.Component {
 	// assumes all custom traits have a Name prop
 	_keyCustomTraits = (item, index) => {
 		let str = item
-		if (item.Name) str = item.Name
-		return this.hashCode(str)+"";
+		if (item.id) str = item.id
+		else if (item.Name) str = item.Name
+		return str
 	}
-	
-	//helper function for determining list item keys
-	hashCode(string) {
-		var hash = 0, i, chr;
-		if (string.length === 0) return hash;
-		for (i = 0; i < string.length; i++) {
-			chr   = string.charCodeAt(i);
-			hash  = ((hash << 5) - hash) + chr;
-			hash |= 0; // Convert to 32bit integer
-		}
-		return hash;
-	};
 	
 	//helper function for displaying name
 	getDisplayName(string) {
