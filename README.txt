@@ -36,3 +36,13 @@ go to line ~585 and DELETE the following block of code:
                 />
               )}
             </View>
+
+
+
+
+
+when you want to release, running react-native run-android --variant=release doesnt work
+-go to android
+-set the gradle.properties and set the keystore password
+-run gradlew.bat assembleRelease--stacktrace and gradlew.bat installRelease --stacktrace
+-find the apk

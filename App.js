@@ -530,7 +530,7 @@ export default class App extends React.Component {
 						}
 
 						{this.state.customizePage == 'editAbility' &&
-						<ScrollView style={this.styles.modalScroll}>
+						<ScrollView style={this.styles.modalScroll} ref={component => this.cusAbiScroll = component}>
 							<TouchableOpacity
 								activeOpacity={0.5}
 								style={this.styles.backButton}
@@ -635,7 +635,7 @@ export default class App extends React.Component {
 						}
 
 						{this.state.customizePage == 'editEquipment' &&
-						<ScrollView style={this.styles.modalScroll}>
+						<ScrollView style={this.styles.modalScroll} ref={component => this.cusEquScroll = component}>
 							<TouchableOpacity
 								activeOpacity={0.5}
 								style={this.styles.backButton}
@@ -739,7 +739,7 @@ export default class App extends React.Component {
 						}
 
 						{this.state.customizePage == 'editRace' &&
-						<ScrollView style={this.styles.modalScroll}>
+						<ScrollView style={this.styles.modalScroll} ref={component => this.cusRacScroll = component}>
 							<TouchableOpacity
 								activeOpacity={0.5}
 								style={this.styles.backButton}
@@ -853,7 +853,7 @@ export default class App extends React.Component {
 						}
 
 						{this.state.customizePage == 'editClass' &&
-						<ScrollView style={this.styles.modalScroll}>
+						<ScrollView style={this.styles.modalScroll} ref={component => this.cusClaScroll = component}>
 							<TouchableOpacity
 								activeOpacity={0.5}
 								style={this.styles.backButton}
@@ -1225,7 +1225,7 @@ export default class App extends React.Component {
 			characters: [],
 			showText: false,
 			settingsVisible: false,
-			customizeVisible: false,
+			customizeVisible: false,			
 			messages: {
 				baseWarning: true,
 				classWarning: true,
@@ -1284,6 +1284,7 @@ export default class App extends React.Component {
 		this.getIntroText = this.getIntroText.bind(this)
 		this.warnChangingDependents = this.warnChangingDependents.bind(this)
 		this.updateClassBase = this.updateClassBase.bind(this)
+		this.updateClassReq = this.updateClassReq.bind(this)
 		this.getClassAsNewTrait = this.getClassAsNewTrait.bind(this)
 		this.getNewClass = this.getNewClass.bind(this)
 		this.setClassDefaults = this.setClassDefaults.bind(this)
@@ -1684,6 +1685,7 @@ export default class App extends React.Component {
 		if (this.state.customizePage === "editAbility") {
 			//validate
 			if (!this.state.newTrait.Name) {
+				this.cusAbiScroll.scrollTo({y: 0, animated: true})
 				this.setState({validate: true})
 				return
 			}
@@ -1717,6 +1719,7 @@ export default class App extends React.Component {
 		if (this.state.customizePage === "editEquipment") {
 			//validate
 			if (!this.state.newTrait.Name) {
+				this.cusEquScroll.scrollTo({y: 0, animated: true})
 				this.setState({validate: true})
 				return
 			}
@@ -1750,6 +1753,9 @@ export default class App extends React.Component {
 		if (this.state.customizePage === "editRace") {
 			//validate
 			if (!this.state.newTrait.Name || !this.state.newTrait.primaryStat || !this.state.newTrait.secondaryStat) {
+				if (!this.state.newTrait.Name) {
+					this.cusRacScroll.scrollTo({y: 0, animated: true})
+				}
 				this.setState({validate: true})
 				return
 			}
@@ -1788,6 +1794,9 @@ export default class App extends React.Component {
 			//validate
 			if (!this.state.newTrait.Name || !this.state.newTrait.primaryStat || !this.state.newTrait.secondaryStat
 				|| !this.state.newTrait.weapon || !this.state.newTrait.armor || !this.state.newTrait.hp) {
+				if (!this.state.newTrait.Name) {
+					this.cusClaScroll.scrollTo({y: 0, animated: true})
+				}
 				this.setState({validate: true})
 				return
 			}
@@ -1932,6 +1941,7 @@ export default class App extends React.Component {
 			page = "races"
 		}
 		if (this.state.customizePage === "editClass") {
+			this.updateClassReq(this.state.newTrait.id)
 			// clear this class on the settings screen if its selected
 			let id = this.state.newTrait.id
 			if (this.state.settingsNew.Class === id) {
@@ -1954,7 +1964,7 @@ export default class App extends React.Component {
 		else {
 			Alert.alert(
 				"Delete base class",
-				"Other classes are based on this class. Are you sure you want to delete it?",
+				"Other classes are based on this class. They will be based on no class if this is deleted, which is fine if you want. Are you sure you want to delete this class?",
 				[
 					{ text: "Yes", onPress: () => {
 						// go through all dependents and make them based on no class
@@ -1980,8 +1990,8 @@ export default class App extends React.Component {
 		let updatedClass = this.getNewClass(classBlueprint)
 		// save the class in-place in our classes array
 		for (let index in this.state.customTraits.classes) {
-			let clas = this.state.customTraits.classes[index]
-			if (clas.id == updatedClass.id) {
+			let curClass = this.state.customTraits.classes[index]
+			if (curClass.id == updatedClass.id) {
 				// yes this is the improper way to set state, but its ok here since nothing in the UI needs updating in response to this (because our sub-menus don't render until they're clicked)
 				this.state.customTraits.classes[index] = updatedClass
 			}
@@ -1989,6 +1999,18 @@ export default class App extends React.Component {
 		// repeat this for our dependents
 		for (let clas of this.getDependents(updatedClass.id)) {
 			this.updateClassBase(clas)
+		}
+	}
+
+	updateClassReq (clas) {
+		// filter out this class from every equipment's and ability's requirements
+		for (let index in this.state.customTraits.equipment) {
+			let curEq = this.state.customTraits.equipment[index]
+			curEq.Requirements.Properties = curEq.Requirements.Properties.filter(item => item !== clas)
+		}
+		for (let index in this.state.customTraits.abilities) {
+			let curAb = this.state.customTraits.abilities[index]
+			curAb.Requirements.Properties = curAb.Requirements.Properties.filter(item => item !== clas)
 		}
 	}
 
@@ -2648,11 +2670,13 @@ export default class App extends React.Component {
 			height: '100%', 
 			opacity: 0.8,
 			backgroundColor: 'black',
-			zIndex: 10
+			zIndex: 1000,
+			elevation: 5
 		},
 
 		overOverlay: {
-			zIndex: 100
+			zIndex: 100000,
+			elevation: 10
 		},
 
 		introText: {
@@ -2675,27 +2699,25 @@ export default class App extends React.Component {
 	}
 	
 	shouldComponentUpdate(nextProps, nextState) {
-		if((nextProps.stateIndex == nextProps.myIndex) || 
-			(this.props.stateIndex == this.props.myIndex) ||
+		// change if:
+		// im currently not selected but going to be,
+		// im currently selected but not going to be,
+		// my index is changing
+		if((nextProps.stateIndex == nextProps.myIndex) && (this.props.stateIndex != this.props.myIndex) ||
+		((this.props.stateIndex == this.props.myIndex) && (this.props.myIndex != nextProps.stateIndex)) ||
 			(this.props.myIndex != nextProps.myIndex)){
 			return true;
 		}
-		
 		return false;
 	}
 }
-class FlatListItemTraits extends React.Component {
+class FlatListItemTraits extends React.PureComponent {
 	render() {
 		return (
 		<View>
 			{this.props.children}
 		</View>
 		)
-	}
-	
-	// TODO optomize 
-	shouldComponentUpdate(nextProps, nextState) {		
-		return true;
 	}
 }
 
