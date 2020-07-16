@@ -1489,6 +1489,7 @@ export default class App extends React.Component {
 	}
 
 	_keyboardDidHide = () => {
+		this.saveCharacter()
 		this.setState({keyboardShowing: false})
 	}
 
@@ -2705,7 +2706,8 @@ export default class App extends React.Component {
 		// my index is changing
 		if((nextProps.stateIndex == nextProps.myIndex) && (this.props.stateIndex != this.props.myIndex) ||
 		((this.props.stateIndex == this.props.myIndex) && (this.props.myIndex != nextProps.stateIndex)) ||
-			(this.props.myIndex != nextProps.myIndex)){
+		(this.props.myIndex != nextProps.myIndex)){
+			console.log("true")
 			return true;
 		}
 		return false;
