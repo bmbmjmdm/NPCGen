@@ -574,7 +574,7 @@ export default class App extends React.Component {
 							{/* Read README.txt to modify MultiSelect if you just installed node_modules */}
 							<MultiSelect
 								hideTags
-								items={this.getAllClasses().map(clas => { return {Name: clas.Name, id: clas.Properties[0]}})}
+								items={this.getAllClassesForReq().map(clas => { return {Name: clas.Name, id: clas.Properties[0]}})}
 								uniqueKey="id"
 								onSelectedItemsChange={ selectedItems => this.setState({ newTrait: {...this.state.newTrait, classReq: selectedItems} }) }
 								selectedItems={this.state.newTrait.classReq}
@@ -679,7 +679,7 @@ export default class App extends React.Component {
 							{/* Read README.txt to modify MultiSelect if you just installed node_modules */}
 							<MultiSelect
 								hideTags
-								items={this.getAllClasses().map(clas => { return {Name: clas.Name, id: clas.Properties[0]}})}
+								items={this.getAllClassesForReq().map(clas => { return {Name: clas.Name, id: clas.Properties[0]}})}
 								uniqueKey="id"
 								onSelectedItemsChange={ selectedItems => this.setState({ newTrait: {...this.state.newTrait, classReq: selectedItems} }) }
 								selectedItems={this.state.newTrait.classReq}
@@ -1279,12 +1279,12 @@ export default class App extends React.Component {
 		this.deleteTrait = this.deleteTrait.bind(this);
 		this.tryToDeleteClass = this.tryToDeleteClass.bind(this)
 		this.getAllClasses = this.getAllClasses.bind(this);
+		this.getAllClassesForReq = this.getAllClassesForReq.bind(this)
 		this.saveClassFirstTime = this.saveClassFirstTime.bind(this)
 		this.useBaseFirstTime = this.useBaseFirstTime.bind(this)
 		this.getIntroText = this.getIntroText.bind(this)
 		this.warnChangingDependents = this.warnChangingDependents.bind(this)
 		this.updateClassBase = this.updateClassBase.bind(this)
-		this.updateClassReq = this.updateClassReq.bind(this)
 		this.getClassAsNewTrait = this.getClassAsNewTrait.bind(this)
 		this.getNewClass = this.getNewClass.bind(this)
 		this.setClassDefaults = this.setClassDefaults.bind(this)
@@ -1942,7 +1942,6 @@ export default class App extends React.Component {
 			page = "races"
 		}
 		if (this.state.customizePage === "editClass") {
-			this.updateClassReq(this.state.newTrait.id)
 			// clear this class on the settings screen if its selected
 			let id = this.state.newTrait.id
 			if (this.state.settingsNew.Class === id) {
@@ -2000,18 +1999,6 @@ export default class App extends React.Component {
 		// repeat this for our dependents
 		for (let clas of this.getDependents(updatedClass.id)) {
 			this.updateClassBase(clas)
-		}
-	}
-
-	updateClassReq (clas) {
-		// filter out this class from every equipment's and ability's requirements
-		for (let index in this.state.customTraits.equipment) {
-			let curEq = this.state.customTraits.equipment[index]
-			curEq.Requirements.Properties = curEq.Requirements.Properties.filter(item => item !== clas)
-		}
-		for (let index in this.state.customTraits.abilities) {
-			let curAb = this.state.customTraits.abilities[index]
-			curAb.Requirements.Properties = curAb.Requirements.Properties.filter(item => item !== clas)
 		}
 	}
 
@@ -2209,6 +2196,19 @@ export default class App extends React.Component {
 	getAllClasses () {
 		let classes = this.state.customTraits.classes.concat(require('./src/Class.js').placeholder)
 		classes = classes.filter(x => x.Name !== "None")
+		return classes
+	}
+
+	// this is basically getAllClasses but it also appends any deleted classes that the current ability/equipment being modified had previously selected as a required class
+	getAllClassesForReq () {
+		let classes = this.getAllClasses()
+		for (let item of this.state.newTrait.classReq) {
+			let found = false
+			for (let clas of classes) {
+				if (clas.Properties[0] === item) found = true
+			}
+			if (!found) classes.unshift({Name:"!Class Deleted!", Properties: [item]})
+		}
 		return classes
 	}
 
