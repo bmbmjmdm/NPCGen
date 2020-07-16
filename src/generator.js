@@ -95,17 +95,29 @@ function setTraits (settings, custom) {
 			// this shouldnt be possible
 			else {}
 		}
+		// equipment for specific classes gets added twice
+		let customEquipmentClasses = []
+		for (let eq of custom.equipment) {
+			if (eq.Requirements && eq.Requirements.Properties) {
+				if (eq.Requirements.Properties.length) customEquipmentClasses.push(eq)
+			}
+			// this shouldnt be possible
+			else {}
+		}
 		// these maxes are based on the pool they're being added to's size as well as how often the user would want them to show up if they only added one or two
 		let abilityClassesMultiplier = getMultiplier(customAbilitiesClasses.length, defaultAbilities.length, 6)
 		let accentMultiplier = getMultiplier(custom.accents.length, defaultAccents.length, 7)
 		let appearenceMultiplier = getMultiplier(custom.appearences.length, defaultAppearences.length, 5)
 		let classMultiplier = getMultiplier(custom.classes.length, defaultClasses.length, 3)
 		let equipmentMultiplier = getMultiplier(custom.equipment.length, defaultEquipment.length, 10)
+		// yes this can push us from 50% to 66% customEquipment/totalEquipment, and thats fine cause class equipment is very specific
+		let equipmentClassesMultiplier = getMultiplier(customEquipmentClasses.length, defaultEquipment.length, 10)
 		let personalityMultiplier = getMultiplier(custom.personalities.length, defaultPersonalities.length, 4)
 		let raceMultiplier = getMultiplier(custom.races.length, defaultRaces.length, 4)
 		// abilities that dont require a class deal with a much smaller ability list, so set the list length to just roughly those
 		let abilityAllMultiplier = getMultiplier(customAbilitiesAll.length, 15, 4)
 
+		// add everything!
 		for (let i = 0; i < abilityClassesMultiplier ; i++) {
 			abilities = abilities.concat(customAbilitiesClasses)
 		}
@@ -123,6 +135,9 @@ function setTraits (settings, custom) {
 		}
 		for (let i = 0; i < equipmentMultiplier ; i++) {
 			equipment = equipment.concat(custom.equipment);
+		}
+		for (let i = 0; i < equipmentClassesMultiplier ; i++) {
+			equipment = equipment.concat(customEquipmentClasses);
 		}
 		for (let i = 0; i < personalityMultiplier ; i++) {
 			personalities = personalities.concat(custom.personalities);  
