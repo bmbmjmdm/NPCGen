@@ -2707,7 +2707,6 @@ export default class App extends React.Component {
 		if((nextProps.stateIndex == nextProps.myIndex) && (this.props.stateIndex != this.props.myIndex) ||
 		((this.props.stateIndex == this.props.myIndex) && (this.props.myIndex != nextProps.stateIndex)) ||
 		(this.props.myIndex != nextProps.myIndex)){
-			console.log("true")
 			return true;
 		}
 		return false;
