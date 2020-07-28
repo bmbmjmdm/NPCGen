@@ -2231,7 +2231,7 @@ export default class App extends React.Component {
 				await fs.writeFile(NEW_FILE_PATH, JSON.stringify({characters: this.state.characters, customTraits: this.state.customTraits}));
 				Alert.alert(
 					"Success",
-					"All data exported to file 'NPCG' in your Downloads folder",
+					"All data exported to file 'NPCG' in your Downloads folder. When moving to a new phone, select this file with 'import content' to keep all your data!",
 					[
 						{ text: "OK", onPress: () => {}}
 					],
